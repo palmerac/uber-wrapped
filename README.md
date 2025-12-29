@@ -2,7 +2,7 @@
 
 A beautiful, privacy-first dashboard that visualizes your Uber ride and Uber Eats history—like Spotify Wrapped, but for your travels and takeout.
 
-**[Live Demo →](https://your-site.pages.dev)** *(update with your CF Pages URL)*
+**[Live Demo →](https://uber-wrapped.pages.dev)**
 
 ![Uber Wrapped Dashboard](https://via.placeholder.com/800x450?text=Uber+Wrapped+Preview)
 
@@ -30,17 +30,31 @@ A beautiful, privacy-first dashboard that visualizes your Uber ride and Uber Eat
 
 ## Development
 
-Run locally with any static server:
+### Option 1: Drag & Drop (recommended)
+Just run a local server and drag your Uber Data folder onto the page:
 
 ```bash
-# Using Python
-python3 -m http.server 8000
-
-# Using Node.js
 npx serve .
+# or
+python3 -m http.server 8000
 ```
 
-Then open [http://localhost:8000](http://localhost:8000)
+Then open [http://localhost:8000](http://localhost:8000) and drop your `Uber Data` folder.
+
+### Option 2: Pre-generate data locally
+If you want to pre-build your data (skips the drag & drop step):
+
+1. Place your `Uber Data` folder in the project root
+2. Generate the data file:
+   ```bash
+   node generate_data.js
+   ```
+3. Run a local server:
+   ```bash
+   npx serve .
+   ```
+
+The app will automatically load from `data.js` if it exists.
 
 ## Deployment
 

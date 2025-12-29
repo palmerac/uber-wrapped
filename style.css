@@ -428,6 +428,30 @@ footer {
     background: radial-gradient(ellipse at center, #0a0a0a 0%, #000 100%);
 }
 
+.landing-header {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: slideIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.landing-title {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: -3px;
+    margin: 0;
+    background: linear-gradient(135deg, #fff 0%, #888 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.landing-tagline {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin: 12px 0 0 0;
+    font-weight: 400;
+}
+
 .dropzone-container {
     max-width: 600px;
     width: 100%;
