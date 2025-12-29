@@ -1,0 +1,26 @@
+# Uber Data (personal data export)
+Uber Data/
+
+# Generated data files
+uber_wrapped_data.json
+data.js
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node (if applicable)
+node_modules/
+npm-debug.log*
+
+# Misc
+*.log
+*.tmp

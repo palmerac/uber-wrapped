@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uber Wrapped</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Leaflet Heat -->
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+</head>
+<body>
+
+    <!-- Dropzone Landing Screen -->
+    <div id="dropzone-screen" class="dropzone-screen">
+        <div class="dropzone-container">
+            <div class="dropzone" id="dropzone">
+                <div class="dropzone-icon">📁</div>
+                <h2>Drop Your Uber Data Folder Here</h2>
+                <p>Or click to select your folder</p>
+                <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
+                <button class="dropzone-button" id="select-folder-btn">Select Folder</button>
+            </div>
+            <div class="dropzone-info">
+                <h3>How to get your Uber data:</h3>
+                <ol>
+                    <li>Go to <a href="https://myprivacy.uber.com/privacy/exploreyourdata/download" target="_blank">Uber Privacy Center</a></li>
+                    <li>Request a copy of your data</li>
+                    <li>Download and unzip the folder</li>
+                    <li>Drop the entire <strong>Uber Data</strong> folder here</li>
+                </ol>
+                <p class="privacy-note">🔒 <strong>Your data never leaves your browser.</strong> All processing happens locally on your device.</p>
+            </div>
+        </div>
+        <div id="loading-indicator" class="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing your data...</p>
+        </div>
+        <div id="error-message" class="error-message" style="display: none;"></div>
+    </div>
+
+    <!-- Dashboard (hidden until data is loaded) -->
+    <div id="dashboard" class="container" style="display: none;">
+        <header>
+            <div class="header-left">
+                <h1>Uber Wrapped.</h1>
+                <div class="subtitle">Your Life on the Move</div>
+            </div>
+            
+            <div class="profile-bar" id="profile-section">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="header-controls">
+                <div class="year-selector-container">
+                    <select id="year-select"></select>
+                    <span class="year-arrow">▼</span>
+                </div>
+                <button class="reset-button" id="reset-btn" title="Load different data">↻</button>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Sidebar: Key Stats -->
+            <div class="stats-sidebar">
+                <div class="main-stat-card">
+                    <div class="card-label">Trips Taken</div>
+                    <div class="card-value" id="total-trips">0</div>
+                </div>
+
+                <div class="main-stat-card">
+                    <div class="card-label">Distance</div>
+                    <div class="card-value"><span id="total-miles">0</span> <span style="font-size: 0.85rem; opacity: 0.5;">mi</span></div>
+                </div>
+
+                <div class="main-stat-card highlight">
+                    <div class="card-label">Total Spend</div>
+                    <div class="card-value" id="total-spent-rides">$0</div>
+                </div>
+
+                <div class="main-stat-card">
+                    <div class="card-label">Surge Warrior</div>
+                    <div class="card-value" id="surge-count">0</div>
+                    <div class="card-sub" id="surge-multiplier">Avg 1.0x</div>
+                </div>
+
+                <div class="main-stat-card">
+                    <div class="card-label">Social Butterfly</div>
+                    <div class="card-value" id="split-count">0</div>
+                    <div class="card-sub">Split fares</div>
+                </div>
+
+                <div class="main-stat-card">
+                    <div class="card-label">The Planner</div>
+                    <div class="card-value" id="multi-dest-count">0</div>
+                    <div class="card-sub">Multi-stop trips</div>
+                </div>
+            </div>
+
+            <!-- Main Content: Map & Lists -->
+            <div class="map-section">
+                <div class="map-container">
+                    <div id="trip-map"></div>
+                    <div class="map-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot pickup"></div>
+                            <span>Pickups</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot dropoff"></div>
+                            <span>Dropoffs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lists and Chart in a compact row -->
+                <div class="lists-grid">
+                    <div class="sub-stat-card">
+                        <div class="card-label">Top Destinations</div>
+                        <div class="list-container" id="top-cities"></div>
+                    </div>
+                    <div class="sub-stat-card">
+                        <div class="card-label">Ride Types</div>
+                        <div class="list-container" id="ride-types"></div>
+                    </div>
+                    <div class="time-chart-container">
+                        <div class="card-label">Time of Day</div>
+                        <div class="bar-chart" id="time-chart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Eats Section -->
+        <div class="eats-section">
+             <div class="eats-header">Good Eats</div>
+             
+             <div class="eats-grid">
+                <div class="sub-stat-card">
+                    <div class="card-label">Orders Placed</div>
+                    <div class="card-value text-green" id="total-orders">0</div>
+                    <div class="card-sub">Deliveries received</div>
+                </div>
+                
+                <div class="sub-stat-card highlight">
+                    <div class="card-label">Total Spend</div>
+                    <div class="card-value text-green" id="total-spent-eats">$0</div>
+                    <div class="card-sub">On delicious food</div>
+                </div>
+
+                <div class="sub-stat-card" id="eats-details-container" style="display: none;">
+                    <div class="card-label">Top Spots</div>
+                    <div class="list-container" id="top-restaurants"></div>
+                </div>
+                
+                <div class="sub-stat-card" id="eats-items-container" style="display: none;">
+                    <div class="card-label">Top Cravings</div>
+                     <div class="list-container" id="top-items"></div>
+                </div>
+             </div>
+
+             <div id="no-eats-msg" style="text-align: center; font-size: 1.25rem; opacity: 0.6; padding: 40px; display: none;">
+                Looks like you cooked at home this year! 🍳
+            </div>
+        </div>
+
+        <footer>
+            Generated locally from your data privacy export. Not affiliated with Uber.
+        </footer>
+    </div>
+
+    <script>
+        // ==========================================
+        // CSV PARSING UTILITIES
+        // ==========================================
+        
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
+        }
+
+        function parseCSV(content) {
+            const lines = content.split('\n').filter(l => l.trim());
+            if (lines.length === 0) return [];
+            
+            const headers = parseCSVLine(lines[0]).map(h => h.trim());
+            
+            return lines.slice(1).map(line => {
+                const values = parseCSVLine(line);
+                const entry = {};
+                headers.forEach((h, i) => {
+                    entry[h] = values[i] ? values[i].trim() : '';
+                });
+                return entry;
+            });
+        }
+
+        // ==========================================
+        // DATA ANALYSIS FUNCTIONS
+        // ==========================================
+
+        function initStats() {
+            return {
+                trips: [],
+                totalSpent: 0,
+                totalMiles: 0,
+                cityCounts: {},
+                timeOfDayCounts: { morning: 0, afternoon: 0, evening: 0, night: 0 },
+                totalMovingTimeSeconds: 0,
+                rideTypes: {},
+                surgeCount: 0,
+                totalSurgeMultiplier: 0,
+                surgeTripCount: 0,
+                splitFareCount: 0,
+                multiDestCount: 0,
+                uniqueOrders: {},
+                restaurantCounts: {},
+                restaurantSpend: {},
+                itemCounts: {},
+                heatmapData: { pickup: [], dropoff: [] }
+            };
+        }
+
+        function updateTripStats(stats, t) {
+            const fare = parseFloat(t.fare_amount || t.client_upfront_fare_local || t.original_fare_local || 0);
+            if (!isNaN(fare)) stats.totalSpent += fare;
+
+            const miles = parseFloat(t.trip_distance_miles || 0);
+            if (!isNaN(miles)) stats.totalMiles += miles;
+
+            if (t.city_name) {
+                stats.cityCounts[t.city_name] = (stats.cityCounts[t.city_name] || 0) + 1;
+            }
+
+            const localDate = new Date(t.request_timestamp_local);
+            const hour = localDate.getHours();
+            if (hour >= 5 && hour < 12) stats.timeOfDayCounts.morning++;
+            else if (hour >= 12 && hour < 17) stats.timeOfDayCounts.afternoon++;
+            else if (hour >= 17 && hour < 21) stats.timeOfDayCounts.evening++;
+            else stats.timeOfDayCounts.night++;
+
+            const duration = parseFloat(t.trip_duration_seconds || 0);
+            if (!isNaN(duration)) stats.totalMovingTimeSeconds += duration;
+
+            let type = t.product_type_name || 'Unknown';
+            if (type.toLowerCase() === 'uberxl') type = 'UberXL';
+            if (type.toLowerCase() === 'uberx') type = 'UberX';
+            stats.rideTypes[type] = (stats.rideTypes[type] || 0) + 1;
+
+            if (t.is_surged === 'true' || t.is_surged === true) {
+                stats.surgeCount++;
+            }
+            const multiplier = parseFloat(t.surge_multiplier || 1);
+            if (!isNaN(multiplier) && multiplier > 1) {
+                stats.totalSurgeMultiplier += multiplier;
+                stats.surgeTripCount++;
+            }
+
+            if (t.is_fare_split === 'true' || t.is_fare_split === true) {
+                stats.splitFareCount++;
+            }
+
+            if (t.is_multidestination === 'true' || t.is_multidestination === true) {
+                stats.multiDestCount++;
+            }
+
+            if (t.begintrip_lat && t.begintrip_lng) {
+                const lat = parseFloat(t.begintrip_lat);
+                const lng = parseFloat(t.begintrip_lng);
+                if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+                    stats.heatmapData.pickup.push([lat, lng]);
+                }
+            }
+
+            if (t.dropoff_lat && t.dropoff_lng) {
+                const lat = parseFloat(t.dropoff_lat);
+                const lng = parseFloat(t.dropoff_lng);
+                if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+                    stats.heatmapData.dropoff.push([lat, lng]);
+                }
+            }
+        }
+
+        function formatTripStats(stats, tripCount) {
+            const topCities = Object.entries(stats.cityCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([city, count]) => ({ city, count }));
+
+            const topRideTypes = Object.entries(stats.rideTypes)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([type, count]) => ({ type, count }));
+
+            return {
+                totalTrips: tripCount,
+                totalSpent: stats.totalSpent.toFixed(2),
+                totalMiles: stats.totalMiles.toFixed(2),
+                topCities,
+                timeOfDayCounts: stats.timeOfDayCounts,
+                totalDurationHours: (stats.totalMovingTimeSeconds / 3600).toFixed(1),
+                rideTypes: topRideTypes,
+                surgeCount: stats.surgeCount,
+                avgSurgeMultiplier: stats.surgeTripCount > 0 ? (stats.totalSurgeMultiplier / stats.surgeTripCount).toFixed(2) : 0,
+                splitFareCount: stats.splitFareCount,
+                multiDestCount: stats.multiDestCount,
+                heatmapData: stats.heatmapData
+            };
+        }
+
+        function analyzeTrips(trips) {
+            const years = {};
+            const lifetime = initStats();
+            let lifetimeTripCount = 0;
+
+            trips.forEach(t => {
+                if (t.status !== 'completed') return;
+
+                const dateStr = t.request_timestamp_utc || t.request_timestamp_local;
+                if (!dateStr) return;
+
+                const date = new Date(dateStr);
+                const year = date.getFullYear();
+
+                if (!years[year]) {
+                    years[year] = { stats: initStats(), count: 0 };
+                }
+
+                years[year].count++;
+                lifetimeTripCount++;
+
+                updateTripStats(years[year].stats, t);
+                updateTripStats(lifetime, t);
+            });
+
+            const result = { years: {}, lifetime: formatTripStats(lifetime, lifetimeTripCount) };
+            for (const year in years) {
+                result.years[year] = formatTripStats(years[year].stats, years[year].count);
+            }
+            return result;
+        }
+
+        function updateOrderStats(stats, o) {
+            const orderKey = o.Request_Time_Local + (o.Restaurant_Name || '');
+
+            if (!stats.uniqueOrders[orderKey]) {
+                stats.uniqueOrders[orderKey] = {
+                    price: parseFloat(o.Order_Price || 0)
+                };
+                stats.totalSpent += stats.uniqueOrders[orderKey].price;
+
+                if (o.Restaurant_Name) {
+                    let name = o.Restaurant_Name.replace(/\s*\(.*?\)\s*/g, '').trim();
+                    stats.restaurantCounts[name] = (stats.restaurantCounts[name] || 0) + 1;
+                    stats.restaurantSpend[name] = (stats.restaurantSpend[name] || 0) + stats.uniqueOrders[orderKey].price;
+                }
+            }
+
+            const itemName = o.Item_Name;
+            if (itemName) {
+                stats.itemCounts[itemName] = (stats.itemCounts[itemName] || 0) + parseInt(o.Item_quantity || 1);
+            }
+        }
+
+        function formatOrderStats(stats) {
+            const topRestaurants = Object.entries(stats.restaurantCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([name, count]) => ({
+                    name,
+                    count,
+                    spend: (stats.restaurantSpend[name] || 0).toFixed(2)
+                }));
+
+            const topItems = Object.entries(stats.itemCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([name, count]) => ({ name, count }));
+
+            return {
+                totalOrders: Object.keys(stats.uniqueOrders).length,
+                totalSpent: stats.totalSpent.toFixed(2),
+                topRestaurants,
+                topItems
+            };
+        }
+
+        function analyzeOrders(orders) {
+            const years = {};
+            const lifetime = initStats();
+
+            orders.forEach(o => {
+                if (o.Order_Status !== 'completed' && o.Order_Status !== '') {
+                    // Skip non-completed orders
+                }
+
+                const dateStr = o.Request_Time_Local;
+                if (!dateStr) return;
+                const date = new Date(dateStr);
+                const year = date.getFullYear();
+
+                if (!years[year]) {
+                    years[year] = initStats();
+                }
+
+                updateOrderStats(years[year], o);
+                updateOrderStats(lifetime, o);
+            });
+
+            const result = { years: {}, lifetime: formatOrderStats(lifetime) };
+            for (const year in years) {
+                result.years[year] = formatOrderStats(years[year]);
+            }
+
+            return result;
+        }
+
+        function getProfileInfo(profileData, ratingsData) {
+            let memberSince = 'Unknown';
+            if (profileData.length > 0 && profileData[0]['Signup Date']) {
+                const d = new Date(profileData[0]['Signup Date']);
+                memberSince = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            }
+
+            let avgRating = 0;
+            if (ratingsData.length > 0) {
+                const ratings = ratingsData.map(r => parseInt(r.five_star_rating)).filter(r => !isNaN(r));
+                if (ratings.length > 0) {
+                    const sum = ratings.reduce((a, b) => a + b, 0);
+                    avgRating = (sum / ratings.length).toFixed(2);
+                }
+            }
+
+            return { memberSince, avgRating };
+        }
+
+        function processAllData(tripData, orderData, profileData, ratingsData) {
+            const tripAnalysis = analyzeTrips(tripData);
+            const orderAnalysis = analyzeOrders(orderData);
+            const profile = getProfileInfo(profileData, ratingsData);
+
+            const allYears = new Set([...Object.keys(tripAnalysis.years), ...Object.keys(orderAnalysis.years)]);
+            const sortedYears = Array.from(allYears).sort((a, b) => b - a);
+
+            const yearsData = {};
+
+            yearsData['Lifetime'] = {
+                trips: tripAnalysis.lifetime,
+                eats: orderAnalysis.lifetime
+            };
+
+            const defaultTripStats = {
+                totalTrips: 0, totalSpent: "0.00", totalMiles: "0.00",
+                topCities: [], timeOfDayCounts: { morning: 0, afternoon: 0, evening: 0, night: 0 },
+                rideTypes: [], surgeCount: 0, avgSurgeMultiplier: 0, splitFareCount: 0, multiDestCount: 0,
+                totalDurationHours: "0.0", heatmapData: { pickup: [], dropoff: [] }
+            };
+
+            const defaultOrderStats = {
+                totalOrders: 0, totalSpent: "0.00", topRestaurants: [], topItems: []
+            };
+
+            sortedYears.forEach(y => {
+                yearsData[y] = {
+                    trips: tripAnalysis.years[y] || defaultTripStats,
+                    eats: orderAnalysis.years[y] || defaultOrderStats
+                };
+            });
+
+            return { profile, years: yearsData };
+        }
+
+        // ==========================================
+        // FILE HANDLING
+        // ==========================================
+
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = e => reject(e);
+                reader.readAsText(file);
+            });
+        }
+
+        /**
+         * Find all CSV files matching a base pattern (handles numbered splits like -0, -1, -2)
+         * For example, pattern 'trips_data' will match trips_data-0.csv, trips_data-1.csv, etc.
+         */
+        async function findAndReadAllCSVs(files, basePatterns) {
+            const allData = [];
+            const matchedFiles = [];
+            
+            // Find all files matching any of the patterns
+            for (const file of files) {
+                const path = (file.webkitRelativePath || file.name).toLowerCase();
+                for (const pattern of basePatterns) {
+                    // Match pattern with optional numbered suffix (-0, -1, etc.)
+                    const patternLower = pattern.toLowerCase();
+                    if (path.includes(patternLower)) {
+                        matchedFiles.push(file);
+                        break;
+                    }
+                }
+            }
+            
+            // Sort files to ensure -0, -1, -2 order
+            matchedFiles.sort((a, b) => {
+                const pathA = (a.webkitRelativePath || a.name);
+                const pathB = (b.webkitRelativePath || b.name);
+                return pathA.localeCompare(pathB);
+            });
+            
+            // Read and parse each file
+            for (const file of matchedFiles) {
+                try {
+                    const content = await readFileAsText(file);
+                    const parsed = parseCSV(content);
+                    allData.push(...parsed);
+                    console.log(`Loaded ${parsed.length} rows from ${file.webkitRelativePath || file.name}`);
+                } catch (e) {
+                    console.warn(`Failed to read ${file.webkitRelativePath || file.name}:`, e);
+                }
+            }
+            
+            return allData;
+        }
+
+        async function processUberDataFolder(files) {
+            showLoading(true);
+            hideError();
+
+            try {
+                const fileArray = Array.from(files);
+                
+                // Find all CSV files (handles split files like -0, -1, -2, etc.)
+                const tripData = await findAndReadAllCSVs(fileArray, ['rider/trips_data', 'trips_data-']);
+                const orderData = await findAndReadAllCSVs(fileArray, ['eats/user_orders', 'user_orders-']);
+                const profileData = await findAndReadAllCSVs(fileArray, ['account and profile/user_profile', 'user_profile-']);
+                const ratingsData = await findAndReadAllCSVs(fileArray, ['rider/rider_lifetime_ratings', 'rider_lifetime_ratings_received-']);
+
+                console.log(`Total: ${tripData.length} trips, ${orderData.length} order items`);
+
+                if (tripData.length === 0 && orderData.length === 0) {
+                    throw new Error('No Uber data found. Make sure you selected the correct "Uber Data" folder containing your trip and order history.');
+                }
+
+                const data = processAllData(tripData, orderData, profileData, ratingsData);
+                
+                window.UBER_DATA = data;
+                showLoading(false);
+                showDashboard();
+                initializeDashboard();
+
+            } catch (err) {
+                console.error('Error processing data:', err);
+                showLoading(false);
+                showError(err.message || 'Failed to process data. Please try again.');
+            }
+        }
+
+        // ==========================================
+        // UI HELPERS
+        // ==========================================
+
+        function showLoading(show) {
+            document.getElementById('loading-indicator').style.display = show ? 'flex' : 'none';
+            document.getElementById('dropzone').style.display = show ? 'none' : 'flex';
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('error-message');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('dropzone-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        function showDropzone() {
+            document.getElementById('dropzone-screen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            showLoading(false);
+            hideError();
+        }
+
+        // ==========================================
+        // DASHBOARD RENDERING 
+        // ==========================================
+
+        let map = null;
+        let pickupLayer = null;
+        let dropoffLayer = null;
+
+        function initializeDashboard() {
+            const data = window.UBER_DATA;
+            if (!data) return;
+
+            // Profile
+            const profileDiv = document.getElementById('profile-section');
+            if (data.profile) {
+                profileDiv.innerHTML = `
+                    <div class="profile-item"><span>Member Since</span> <b>${data.profile.memberSince}</b></div>
+                    <div class="profile-item"><span>Rating</span> <b>${data.profile.avgRating} ★</b></div>
+                `;
+            }
+
+            // Year Selector
+            const yearSelect = document.getElementById('year-select');
+            yearSelect.innerHTML = '';
+            const years = Object.keys(data.years);
+
+            const sortedYears = years.slice().sort((a, b) => {
+                if (a === 'Lifetime') return -1;
+                if (b === 'Lifetime') return 1;
+                return Number(b) - Number(a);
+            });
+
+            sortedYears.forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year;
+                opt.textContent = year;
+                yearSelect.appendChild(opt);
+            });
+
+            if (sortedYears.length > 0) {
+                loadYear(sortedYears[0]);
+            }
+
+            yearSelect.addEventListener('change', (e) => {
+                loadYear(e.target.value);
+            });
+        }
+
+        function loadYear(year) {
+            const data = window.UBER_DATA;
+            const yearData = data.years[year];
+            if (!yearData) return;
+
+            // Trips
+            const trips = yearData.trips;
+            animateValue("total-trips", 0, trips.totalTrips, 1500);
+
+            const miles = parseFloat(trips.totalMiles);
+            document.getElementById('total-miles').textContent = Math.round(miles).toLocaleString();
+
+            document.getElementById('total-spent-rides').textContent = '$' + trips.totalSpent;
+
+            animateValue("surge-count", 0, trips.surgeCount, 1500);
+            if (trips.avgSurgeMultiplier > 0) {
+                document.getElementById("surge-multiplier").textContent = `Avg ${trips.avgSurgeMultiplier}x`;
+            } else {
+                document.getElementById("surge-multiplier").textContent = `No Surge`;
+            }
+
+            animateValue("split-count", 0, trips.splitFareCount, 1500);
+            animateValue("multi-dest-count", 0, trips.multiDestCount, 1500);
+
+            renderList("top-cities", trips.topCities, "trips", "city");
+            renderList("ride-types", trips.rideTypes, "", "type");
+            renderTimeChart(trips.timeOfDayCounts);
+
+            // Eats
+            const eats = yearData.eats;
+            animateValue("total-orders", 0, eats.totalOrders, 1500);
+            document.getElementById('total-spent-eats').textContent = '$' + eats.totalSpent;
+
+            const eatsSpots = document.getElementById('eats-details-container');
+            const eatsItems = document.getElementById('eats-items-container');
+            const noEatsMsg = document.getElementById('no-eats-msg');
+
+            if (eats.totalOrders > 0) {
+                eatsSpots.style.display = 'block';
+                eatsItems.style.display = 'block';
+                noEatsMsg.style.display = 'none';
+                renderList("top-restaurants", eats.topRestaurants, "orders", "name");
+                renderList("top-items", eats.topItems, "", "name");
+            } else {
+                eatsSpots.style.display = 'none';
+                eatsItems.style.display = 'none';
+                noEatsMsg.style.display = 'block';
+            }
+
+            // Map
+            renderMap(trips.heatmapData);
+        }
+
+        function renderMap(data) {
+            const mapContainer = document.getElementById('trip-map');
+            if (!mapContainer) return;
+
+            const parent = mapContainer.parentElement;
+
+            if (typeof L === 'undefined') {
+                console.warn("Leaflet (L) is not defined. Map cannot be rendered.");
+                if (parent) parent.style.display = 'none';
+                return;
+            }
+
+            const hasData = data && (
+                (data.pickup && data.pickup.length > 0) ||
+                (data.dropoff && data.dropoff.length > 0)
+            );
+
+            if (!hasData) {
+                if (parent) parent.style.display = 'none';
+                return;
+            }
+
+            if (parent) parent.style.display = 'block';
+
+            if (!map) {
+                map = L.map('trip-map', {
+                    zoomControl: false,
+                    attributionControl: false
+                });
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19
+                }).addTo(map);
+            }
+
+            setTimeout(() => {
+                if (map) map.invalidateSize();
+            }, 100);
+
+            if (pickupLayer) {
+                try { map.removeLayer(pickupLayer); } catch (e) { }
+            }
+            if (dropoffLayer) {
+                try { map.removeLayer(dropoffLayer); } catch (e) { }
+            }
+
+            if (typeof L.heatLayer === 'function') {
+                if (data.pickup && data.pickup.length > 0) {
+                    pickupLayer = L.heatLayer(data.pickup, {
+                        radius: 12,
+                        blur: 20,
+                        maxZoom: 12,
+                        gradient: { 0.4: '#00f2ff', 0.65: '#00c3ff', 1: '#0044ff' }
+                    }).addTo(map);
+                }
+
+                if (data.dropoff && data.dropoff.length > 0) {
+                    dropoffLayer = L.heatLayer(data.dropoff, {
+                        radius: 12,
+                        blur: 20,
+                        maxZoom: 12,
+                        gradient: { 0.4: '#ff9d00', 0.65: '#ff0000', 1: '#fff' }
+                    }).addTo(map);
+                }
+
+                const allPoints = [...(data.pickup || []), ...(data.dropoff || [])];
+                if (allPoints.length > 0) {
+                    map.fitBounds(allPoints, { padding: [20, 20] });
+                }
+            } else {
+                console.warn("Leaflet.heat is not loaded.");
+            }
+        }
+
+        function renderList(containerId, list, suffix, keyName) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            if (!list || list.length === 0) {
+                container.innerHTML = '<div style="opacity:0.5; font-size:0.9rem;">No data available</div>';
+                return;
+            }
+            list.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'list-item';
+
+                let rightText = suffix ? `${item.count} ${suffix}` : item.count;
+
+                if (item.spend) {
+                    rightText = `<span>$${item.spend}</span> <span style="font-size:0.8em; opacity:0.7">(${item.count})</span>`;
+                }
+
+                el.innerHTML = `<span>${item[keyName] || item.city || item.type || item.name}</span> <span>${rightText}</span>`;
+                container.appendChild(el);
+            });
+        }
+
+        function renderTimeChart(times) {
+            const container = document.getElementById('time-chart');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!times) return;
+
+            const maxVal = Math.max(times.morning || 0, times.afternoon || 0, times.evening || 0, times.night || 0) || 1;
+            const timeLabels = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', night: 'Night' };
+
+            Object.keys(timeLabels).forEach(k => {
+                const count = times[k] || 0;
+                const pct = (count / maxVal) * 100;
+                const bar = document.createElement('div');
+                bar.className = `bar ${k}`;
+                bar.style.height = '4px';
+                bar.innerHTML = `
+                    <div class="bar-tooltip">${count} rides</div>
+                    <div class="bar-label">${timeLabels[k]}</div>
+                `;
+                container.appendChild(bar);
+
+                setTimeout(() => {
+                    bar.style.height = Math.max(pct, 5) + '%';
+                }, 200);
+            });
+        }
+
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = end;
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // ==========================================
+        // EVENT LISTENERS
+        // ==========================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropzone = document.getElementById('dropzone');
+            const folderInput = document.getElementById('folder-input');
+            const selectBtn = document.getElementById('select-folder-btn');
+            const resetBtn = document.getElementById('reset-btn');
+
+            // Try to auto-load data.js if it exists
+            tryLoadPreGeneratedData().then(loaded => {
+                if (loaded) {
+                    // Data found, show dashboard directly
+                    showDashboard();
+                    initializeDashboard();
+                }
+                // Otherwise dropzone is already visible
+            });
+
+            // Click to select folder
+            selectBtn.addEventListener('click', () => {
+                folderInput.click();
+            });
+
+            dropzone.addEventListener('click', (e) => {
+                if (e.target !== selectBtn) {
+                    folderInput.click();
+                }
+            });
+
+            // Folder input change
+            folderInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    processUberDataFolder(e.target.files);
+                }
+            });
+
+            // Drag and drop
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('drag-over');
+            });
+
+            dropzone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('drag-over');
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('drag-over');
+
+                const items = e.dataTransfer.items;
+                if (items) {
+                    const files = [];
+                    const promises = [];
+
+                    for (const item of items) {
+                        if (item.kind === 'file') {
+                            const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+                            if (entry && entry.isDirectory) {
+                                promises.push(scanDirectory(entry, files));
+                            } else {
+                                files.push(item.getAsFile());
+                            }
+                        }
+                    }
+
+                    Promise.all(promises).then(() => {
+                        if (files.length > 0) {
+                            processUberDataFolder(files);
+                        }
+                    });
+                }
+            });
+
+            // Reset button
+            resetBtn.addEventListener('click', () => {
+                window.UBER_DATA = null;
+                map = null;
+                pickupLayer = null;
+                dropoffLayer = null;
+                document.getElementById('trip-map').innerHTML = '';
+                showDropzone();
+            });
+        });
+
+        // Try to load pre-generated data.js file
+        function tryLoadPreGeneratedData() {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = 'data.js';
+                
+                script.onload = () => {
+                    // Check if UBER_DATA was defined by the script
+                    if (window.UBER_DATA && window.UBER_DATA.years) {
+                        console.log('Loaded pre-generated data.js');
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                };
+                
+                script.onerror = () => {
+                    // data.js doesn't exist, show dropzone
+                    console.log('No data.js found, showing dropzone');
+                    resolve(false);
+                };
+                
+                document.head.appendChild(script);
+            });
+        }
+
+        // Recursive directory scanner for drag-and-drop
+        function scanDirectory(entry, files) {
+            return new Promise((resolve) => {
+                if (entry.isFile) {
+                    entry.file(file => {
+                        file.webkitRelativePath = entry.fullPath;
+                        files.push(file);
+                        resolve();
+                    });
+                } else if (entry.isDirectory) {
+                    const reader = entry.createReader();
+                    reader.readEntries(entries => {
+                        const promises = entries.map(e => scanDirectory(e, files));
+                        Promise.all(promises).then(resolve);
+                    });
+                } else {
+                    resolve();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
