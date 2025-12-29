@@ -4,7 +4,7 @@ A beautiful, privacy-first dashboard that visualizes your Uber ride and Uber Eat
 
 **[Live Demo →](https://uber-wrapped.pages.dev)**
 
-![Uber Wrapped Dashboard](https://via.placeholder.com/800x450?text=Uber+Wrapped+Preview)
+
 
 ## Features
 
