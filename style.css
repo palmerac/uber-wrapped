@@ -401,6 +401,16 @@ footer {
     font-size: 0.8rem;
 }
 
+footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+footer a:hover {
+    color: var(--text-primary);
+}
+
 /* Animations */
 @keyframes slideIn {
     from {
@@ -648,5 +658,150 @@ footer {
 
     .lists-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 16px 20px;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .header-left h1 {
+        font-size: 2rem;
+    }
+
+    .profile-bar {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .stats-sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .map-container {
+        height: 280px;
+    }
+
+    .eats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Landing page mobile */
+    .landing-title {
+        font-size: 2.5rem;
+        letter-spacing: -2px;
+    }
+
+    .landing-tagline {
+        font-size: 1rem;
+    }
+
+    .dropzone-container {
+        padding: 0 10px;
+    }
+
+    .dropzone {
+        padding: 40px 24px;
+    }
+
+    .dropzone h2 {
+        font-size: 1.2rem;
+    }
+
+    .dropzone-icon {
+        font-size: 3rem;
+    }
+
+    .dropzone-info {
+        padding: 16px;
+    }
+
+    .dropzone-info ol {
+        font-size: 0.8rem;
+        line-height: 1.6;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 12px 16px;
+    }
+
+    .header-left h1 {
+        font-size: 1.75rem;
+    }
+
+    .subtitle {
+        font-size: 0.85rem;
+    }
+
+    .stats-sidebar {
+        grid-template-columns: 1fr;
+    }
+
+    .main-stat-card .card-value {
+        font-size: 1.3rem;
+    }
+
+    .map-container {
+        height: 240px;
+    }
+
+    .eats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Landing page mobile small */
+    .landing-header {
+        margin-bottom: 24px;
+    }
+
+    .landing-title {
+        font-size: 2rem;
+    }
+
+    .landing-tagline {
+        font-size: 0.9rem;
+    }
+
+    .dropzone {
+        padding: 32px 20px;
+        border-radius: 16px;
+    }
+
+    .dropzone h2 {
+        font-size: 1.1rem;
+    }
+
+    .dropzone p {
+        font-size: 0.85rem;
+    }
+
+    .dropzone-button {
+        padding: 10px 24px;
+        font-size: 0.9rem;
+    }
+
+    .dropzone-info h3 {
+        font-size: 0.85rem;
+    }
+
+    .privacy-note {
+        font-size: 0.75rem;
+        padding: 10px 12px;
     }
 }
