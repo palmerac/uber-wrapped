@@ -114,8 +114,30 @@ function initStats() {
         restaurantCounts: {},
         restaurantSpend: {},
         itemCounts: {},
-        heatmapData: { pickup: [], dropoff: [] }
+        heatmapData: { pickup: [], dropoff: [] },
+        tripDates: new Set(),    // Track unique dates for streak calculation
+        orderDates: new Set(),   // Track unique order dates for streak calculation
+        dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0] // 0=Sun, 6=Sat
     };
+}
+
+function calculateMaxStreak(dateSet) {
+    if (dateSet.size === 0) return 0;
+    const sorted = Array.from(dateSet).sort();
+    let maxStreak = 1;
+    let currentStreak = 1;
+    for (let i = 1; i < sorted.length; i++) {
+        const prev = new Date(sorted[i - 1]);
+        const curr = new Date(sorted[i]);
+        const diffDays = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+        if (diffDays === 1) {
+            currentStreak++;
+            maxStreak = Math.max(maxStreak, currentStreak);
+        } else if (diffDays > 1) {
+            currentStreak = 1;
+        }
+    }
+    return maxStreak;
 }
 
 function updateTripStats(stats, t) {
@@ -129,12 +151,24 @@ function updateTripStats(stats, t) {
         stats.cityCounts[t.city_name] = (stats.cityCounts[t.city_name] || 0) + 1;
     }
 
-    const localDate = new Date(t.request_timestamp_local);
-    const hour = localDate.getHours();
-    if (hour >= 5 && hour < 12) stats.timeOfDayCounts.morning++;
-    else if (hour >= 12 && hour < 17) stats.timeOfDayCounts.afternoon++;
-    else if (hour >= 17 && hour < 21) stats.timeOfDayCounts.evening++;
-    else stats.timeOfDayCounts.night++;
+    const dateStr = t.request_timestamp_local || t.request_timestamp_utc;
+    if (dateStr) {
+        const localDate = new Date(dateStr);
+        if (!isNaN(localDate.getTime())) {
+            const hour = localDate.getHours();
+            if (hour >= 5 && hour < 12) stats.timeOfDayCounts.morning++;
+            else if (hour >= 12 && hour < 17) stats.timeOfDayCounts.afternoon++;
+            else if (hour >= 17 && hour < 21) stats.timeOfDayCounts.evening++;
+            else stats.timeOfDayCounts.night++;
+
+            // Day of Week
+            stats.dayOfWeekCounts[localDate.getDay()]++;
+
+            // Streak Calculation
+            const tripDate = localDate.toISOString().split('T')[0];
+            stats.tripDates.add(tripDate);
+        }
+    }
 
     const duration = parseFloat(t.trip_duration_seconds || 0);
     if (!isNaN(duration)) stats.totalMovingTimeSeconds += duration;
@@ -201,7 +235,9 @@ function formatTripStats(stats, tripCount) {
         avgSurgeMultiplier: stats.surgeTripCount > 0 ? (stats.totalSurgeMultiplier / stats.surgeTripCount).toFixed(2) : 0,
         splitFareCount: stats.splitFareCount,
         multiDestCount: stats.multiDestCount,
-        heatmapData: stats.heatmapData
+        heatmapData: stats.heatmapData,
+        maxStreak: calculateMaxStreak(stats.tripDates),
+        dayOfWeekCounts: stats.dayOfWeekCounts
     };
 }
 
@@ -211,7 +247,8 @@ function analyzeTrips(trips) {
     let lifetimeTripCount = 0;
 
     trips.forEach(t => {
-        if (t.status !== 'completed') return;
+        // Include both 'completed' and 'fare_split' as valid completed trips
+        if (t.status !== 'completed' && t.status !== 'fare_split') return;
 
         const dateStr = t.request_timestamp_utc || t.request_timestamp_local;
         if (!dateStr) return;
@@ -257,6 +294,17 @@ function updateOrderStats(stats, o) {
     if (itemName) {
         stats.itemCounts[itemName] = (stats.itemCounts[itemName] || 0) + parseInt(o.Item_quantity || 1);
     }
+
+    // Track order date for streak and day-of-week calculation
+    const dateStr = o.Request_Time_Local;
+    if (dateStr) {
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+            const orderDate = date.toISOString().split('T')[0];
+            stats.orderDates.add(orderDate);
+            stats.dayOfWeekCounts[date.getDay()]++;
+        }
+    }
 }
 
 function formatOrderStats(stats) {
@@ -278,7 +326,9 @@ function formatOrderStats(stats) {
         totalOrders: Object.keys(stats.uniqueOrders).length,
         totalSpent: stats.totalSpent.toFixed(2),
         topRestaurants,
-        topItems
+        topItems,
+        maxStreak: calculateMaxStreak(stats.orderDates),
+        dayOfWeekCounts: stats.dayOfWeekCounts
     };
 }
 
@@ -358,12 +408,15 @@ try {
         totalTrips: 0, totalSpent: "0.00", totalMiles: "0.00",
         topCities: [], timeOfDayCounts: { morning: 0, afternoon: 0, evening: 0, night: 0 },
         rideTypes: [], surgeCount: 0, avgSurgeMultiplier: 0, splitFareCount: 0, multiDestCount: 0,
-        totalDurationHours: "0.0", heatmapData: { pickup: [], dropoff: [] }
+        totalDurationHours: "0.0", heatmapData: { pickup: [], dropoff: [] },
+        maxStreak: 0, dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0]
     };
 
     const defaultOrderStats = {
-        totalOrders: 0, totalSpent: "0.00", topRestaurants: [], topItems: []
+        totalOrders: 0, totalSpent: "0.00", topRestaurants: [], topItems: [],
+        maxStreak: 0, dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0]
     };
+
 
     sortedYears.forEach(y => {
         yearsData[y] = {

@@ -3,7 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uber Wrapped</title>
+    
+    <!-- Primary Meta Tags -->
+    <title>Uber Wrapped – Visualize Your Uber Ride & Eats Statistics | Year in Review</title>
+    <meta name="title" content="Uber Wrapped – Visualize Your Uber Ride & Eats Statistics | Year in Review">
+    <meta name="description" content="Create your personal Uber Wrapped! Upload your Uber data export to visualize your trips, spending, top destinations, Uber Eats orders, and more – all processed locally in your browser.">
+    <meta name="keywords" content="Uber Wrapped, Uber year in review, Uber statistics, Uber data visualization, ride history, Uber Eats wrapped, trip analysis">
+    <meta name="author" content="Aaron Palmer">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://palmerac.github.io/uber-wrapped/">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://palmerac.github.io/uber-wrapped/">
+    <meta property="og:title" content="Uber Wrapped – Your Year in Rides & Eats">
+    <meta property="og:description" content="Visualize your Uber journey: trips, spending, destinations, and Uber Eats orders. All processed locally – your data never leaves your browser.">
+    <meta property="og:image" content="https://palmerac.github.io/uber-wrapped/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Uber Wrapped">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://palmerac.github.io/uber-wrapped/">
+    <meta name="twitter:title" content="Uber Wrapped – Your Year in Rides & Eats">
+    <meta name="twitter:description" content="Create your personal Uber year in review! Visualize trips, spending, and Uber Eats orders.">
+    <meta name="twitter:image" content="https://palmerac.github.io/uber-wrapped/og-image.png">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Uber Wrapped",
+        "description": "Visualize your Uber ride and Uber Eats statistics in a Spotify Wrapped-style dashboard. All data processing happens locally in your browser.",
+        "url": "https://palmerac.github.io/uber-wrapped/",
+        "applicationCategory": "Utility",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Aaron Palmer",
+            "url": "https://github.com/palmerac"
+        }
+    }
+    </script>
+    
     <link rel="stylesheet" href="style.css">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -11,43 +67,50 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Leaflet Heat -->
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <!-- html2canvas for screenshot export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 
+    <main>
     <!-- Dropzone Landing Screen -->
-    <div id="dropzone-screen" class="dropzone-screen">
+    <section id="dropzone-screen" class="dropzone-screen" aria-label="Data Upload">
         <div class="landing-header">
             <h1 class="landing-title">Uber Wrapped</h1>
             <p class="landing-tagline">Your year in rides and eats — Spotify Wrapped style</p>
         </div>
         <div class="dropzone-container">
-            <div class="dropzone" id="dropzone">
-                <div class="dropzone-icon">📁</div>
+            <div class="dropzone" id="dropzone" role="button" aria-label="Drop zone for Uber data folder">
+                <div class="dropzone-icon" aria-hidden="true">📁</div>
                 <h2>Drop Your Uber Data Folder Here</h2>
                 <p>Or click to select your folder</p>
-                <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
+                <input type="file" id="folder-input" webkitdirectory directory multiple hidden aria-label="Select Uber data folder" />
                 <button class="dropzone-button" id="select-folder-btn">Select Folder</button>
             </div>
-            <div class="dropzone-info">
+            <aside class="dropzone-info">
                 <h3>How to get your Uber data:</h3>
                 <ol>
-                    <li>Go to <a href="https://myprivacy.uber.com/privacy/exploreyourdata/download" target="_blank">Uber Privacy Center</a></li>
+                    <li>Go to <a href="https://myprivacy.uber.com/privacy/exploreyourdata/download" target="_blank" rel="noopener noreferrer">Uber Privacy Center</a></li>
                     <li>Request a copy of your data</li>
                     <li>Download and unzip the folder</li>
                     <li>Drop the entire <strong>Uber Data</strong> folder here</li>
                 </ol>
                 <p class="privacy-note">🔒 <strong>Your data never leaves your browser.</strong> All processing happens locally on your device.</p>
-            </div>
+            </aside>
         </div>
-        <div id="loading-indicator" class="loading-indicator" style="display: none;">
-            <div class="spinner"></div>
+        <div id="loading-indicator" class="loading-indicator" style="display: none;" aria-live="polite">
+            <div class="spinner" aria-hidden="true"></div>
             <p>Processing your data...</p>
         </div>
-        <div id="error-message" class="error-message" style="display: none;"></div>
-    </div>
+        <div id="error-message" class="error-message" style="display: none;" role="alert"></div>
+    </section>
 
     <!-- Dashboard (hidden until data is loaded) -->
-    <div id="dashboard" class="container" style="display: none;">
+    <section id="dashboard" class="container" style="display: none;" aria-label="Uber Statistics Dashboard">
         <header>
             <div class="header-left">
                 <h1>Uber Wrapped.</h1>
@@ -102,6 +165,12 @@
                     <div class="card-value" id="multi-dest-count">0</div>
                     <div class="card-sub">Multi-stop trips</div>
                 </div>
+
+                <div class="main-stat-card streak-card" id="ride-streak-card" style="display: none;">
+                    <div class="card-label"><span class="streak-icon">🔥</span> Ride Streak</div>
+                    <div class="card-value" id="ride-streak">0</div>
+                    <div class="card-sub">Days in a row</div>
+                </div>
             </div>
 
             <!-- Main Content: Map & Lists -->
@@ -127,8 +196,10 @@
                         <div class="list-container" id="top-cities"></div>
                     </div>
                     <div class="sub-stat-card">
-                        <div class="card-label">Ride Types</div>
-                        <div class="list-container" id="ride-types"></div>
+                        <div class="card-label">Weekly Habits</div>
+                        <div class="chart-container" style="position: relative; height: 160px; width: 100%;">
+                            <canvas id="day-of-week-chart"></canvas>
+                        </div>
                     </div>
                     <div class="time-chart-container">
                         <div class="card-label">Time of Day</div>
@@ -139,7 +210,7 @@
         </div>
 
         <!-- Eats Section -->
-        <div class="eats-section">
+        <section class="eats-section" aria-label="Uber Eats Statistics">
              <div class="eats-header">Good Eats</div>
              
              <div class="eats-grid">
@@ -164,17 +235,125 @@
                     <div class="card-label">Top Cravings</div>
                      <div class="list-container" id="top-items"></div>
                 </div>
+
+                <div class="sub-stat-card streak-card" id="eats-streak-card" style="display: none;">
+                    <div class="card-label"><span class="streak-icon">🔥</span> Order Streak</div>
+                    <div class="card-value text-green" id="eats-streak">0</div>
+                    <div class="card-sub">Days in a row</div>
+                </div>
+
+                <div class="sub-stat-card" id="eats-habits-container" style="display: none;">
+                    <div class="card-label">Weekly Habits</div>
+                    <div class="chart-container" style="position: relative; height: 160px; width: 100%;">
+                        <canvas id="eats-day-of-week-chart"></canvas>
+                    </div>
+                </div>
              </div>
 
              <div id="no-eats-msg" style="text-align: center; font-size: 1.25rem; opacity: 0.6; padding: 40px; display: none;">
                 Looks like you cooked at home this year! 🍳
             </div>
-        </div>
+        </section>
 
         <footer>
-            Generated locally from your data privacy export. Not affiliated with Uber.
-            <br><a href="https://github.com/palmerac/uber-wrapped" target="_blank">View on GitHub</a>
+            <div class="share-buttons">
+                <button class="share-btn rides" id="share-rides-btn">
+                    <span class="icon">📸</span> Share Rides
+                </button>
+                <button class="share-btn eats" id="share-eats-btn">
+                    <span class="icon">📸</span> Share Eats
+                </button>
+            </div>
+            <p style="margin-top: 20px;">Generated locally from your data privacy export. Not affiliated with Uber.</p>
+            <p><a href="https://github.com/palmerac/uber-wrapped" target="_blank" rel="noopener noreferrer">View on GitHub</a></p>
         </footer>
+    </section>
+    </main>
+
+    <!-- Hidden Share Templates for Screenshot Export -->
+    <div id="rides-share-template" class="share-template rides-template">
+        <div class="template-header">
+            <div class="template-logo">🚗</div>
+            <div class="template-title">Uber Wrapped</div>
+            <div class="template-year" id="share-rides-year">2024</div>
+        </div>
+        <div class="template-content">
+            <div class="big-stat">
+                <div class="big-stat-value" id="share-rides-count">0</div>
+                <div class="big-stat-label">Rides</div>
+            </div>
+            <div class="stats-row" style="justify-content: center;">
+                <div class="stat-item">
+                    <div class="stat-value" id="share-rides-miles">0</div>
+                    <div class="stat-label">Miles</div>
+                </div>
+            </div>
+            <div class="streak-badge" id="share-rides-streak-badge" style="display: none;">
+                <div class="streak-fire">🔥</div>
+                <div class="streak-text">
+                    <div class="streak-value" id="share-rides-streak">0</div>
+                    <div class="streak-label">Day Streak</div>
+                </div>
+            </div>
+            <div class="list-section">
+                <div class="list-title">Top Destinations</div>
+                <div class="list-items" id="share-rides-destinations"></div>
+            </div>
+            <div class="list-section">
+                <div class="list-title">Weekly Habits</div>
+                <div class="chart-container" style="position: relative; height: 200px; width: 100%;">
+                     <canvas id="share-rides-dow-chart"></canvas>
+                </div>
+            </div>
+            <div class="list-section">
+                <div class="list-title">When You Ride</div>
+                <div class="time-chart-share" id="share-rides-time-chart"></div>
+            </div>
+        </div>
+        <div class="template-footer">
+            <div class="template-url">palmerac.github.io/uber-wrapped</div>
+            <div class="template-cta">Create your own Uber Wrapped!</div>
+        </div>
+    </div>
+
+    <div id="eats-share-template" class="share-template eats-template">
+        <div class="template-header">
+            <div class="template-logo">🍔</div>
+            <div class="template-title">Uber Eats Wrapped</div>
+            <div class="template-year" id="share-eats-year">2024</div>
+        </div>
+        <div class="template-content">
+            <div class="big-stat">
+                <div class="big-stat-value" id="share-eats-count">0</div>
+                <div class="big-stat-label">Orders</div>
+            </div>
+            <div class="streak-badge" id="share-eats-streak-badge" style="display: none;">
+                <div class="streak-fire">🔥</div>
+                <div class="streak-text">
+                    <div class="streak-value" id="share-eats-streak">0</div>
+                    <div class="streak-label">Day Streak</div>
+                </div>
+            </div>
+            <div class="list-section">
+                <div class="list-title">Top Spots</div>
+                <div class="list-items" id="share-eats-restaurants"></div>
+            </div>
+            <div class="list-section">
+                <div class="list-title">Top Cravings</div>
+                <div class="list-items" id="share-eats-items"></div>
+            </div>
+            <!-- Eats Day of Week section in share template -->
+             <div class="list-section">
+                 <div class="list-title">Weekly Habits</div>
+                 <div class="chart-container" style="position: relative; height: 200px; width: 100%;">
+                      <canvas id="share-eats-dow-chart"></canvas>
+                 </div>
+             </div>
+        </div>
+        <div class="template-footer">
+            <div class="template-url">palmerac.github.io/uber-wrapped</div>
+            <div class="template-cta">Create your own Uber Wrapped!</div>
+        </div>
     </div>
 
     <script>
@@ -182,41 +361,7 @@
         // CSV PARSING UTILITIES
         // ==========================================
         
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current);
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            result.push(current);
-            return result;
-        }
-
-        function parseCSV(content) {
-            const lines = content.split('\n').filter(l => l.trim());
-            if (lines.length === 0) return [];
-            
-            const headers = parseCSVLine(lines[0]).map(h => h.trim());
-            
-            return lines.slice(1).map(line => {
-                const values = parseCSVLine(line);
-                const entry = {};
-                headers.forEach((h, i) => {
-                    entry[h] = values[i] ? values[i].trim() : '';
-                });
-                return entry;
-            });
-        }
+        // parseCSV functions removed in favor of Papa Parse library
 
         // ==========================================
         // DATA ANALYSIS FUNCTIONS
@@ -240,7 +385,10 @@
                 restaurantCounts: {},
                 restaurantSpend: {},
                 itemCounts: {},
-                heatmapData: { pickup: [], dropoff: [] }
+                heatmapData: { pickup: [], dropoff: [] },
+                tripDates: new Set(),    // Track unique dates for streak calculation
+                orderDates: new Set(),   // Track unique order dates for streak calculation
+                dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0] // 0=Sun, 6=Sat
             };
         }
 
@@ -255,12 +403,26 @@
                 stats.cityCounts[t.city_name] = (stats.cityCounts[t.city_name] || 0) + 1;
             }
 
-            const localDate = new Date(t.request_timestamp_local);
-            const hour = localDate.getHours();
-            if (hour >= 5 && hour < 12) stats.timeOfDayCounts.morning++;
-            else if (hour >= 12 && hour < 17) stats.timeOfDayCounts.afternoon++;
-            else if (hour >= 17 && hour < 21) stats.timeOfDayCounts.evening++;
-            else stats.timeOfDayCounts.night++;
+            // Consolidate date parsing
+            const dateStr = t.request_timestamp_local || t.request_timestamp_utc;
+            if (dateStr) {
+                const localDate = new Date(dateStr);
+                if (!isNaN(localDate.getTime())) {
+                    // Time of Day
+                    const hour = localDate.getHours();
+                    if (hour >= 5 && hour < 12) stats.timeOfDayCounts.morning++;
+                    else if (hour >= 12 && hour < 17) stats.timeOfDayCounts.afternoon++;
+                    else if (hour >= 17 && hour < 21) stats.timeOfDayCounts.evening++;
+                    else stats.timeOfDayCounts.night++;
+
+                    // Day of Week
+                    stats.dayOfWeekCounts[localDate.getDay()]++;
+
+                    // Streak Calculation
+                    const tripDate = localDate.toISOString().split('T')[0];
+                    stats.tripDates.add(tripDate);
+                }
+            }
 
             const duration = parseFloat(t.trip_duration_seconds || 0);
             if (!isNaN(duration)) stats.totalMovingTimeSeconds += duration;
@@ -304,6 +466,31 @@
             }
         }
 
+        // Calculate maximum streak of consecutive days
+        function calculateMaxStreak(dateSet) {
+            if (!dateSet || dateSet.size === 0) return 0;
+            
+            const sortedDates = Array.from(dateSet).sort();
+            let maxStreak = 1;
+            let currentStreak = 1;
+            
+            for (let i = 1; i < sortedDates.length; i++) {
+                const prevDate = new Date(sortedDates[i - 1]);
+                const currDate = new Date(sortedDates[i]);
+                const diffDays = (currDate - prevDate) / (1000 * 60 * 60 * 24);
+                
+                if (diffDays === 1) {
+                    currentStreak++;
+                    maxStreak = Math.max(maxStreak, currentStreak);
+                } else if (diffDays > 1) {
+                    currentStreak = 1;
+                }
+                // If diffDays === 0, it's a duplicate date, skip
+            }
+            
+            return maxStreak;
+        }
+
         function formatTripStats(stats, tripCount) {
             const topCities = Object.entries(stats.cityCounts)
                 .sort((a, b) => b[1] - a[1])
@@ -327,7 +514,10 @@
                 avgSurgeMultiplier: stats.surgeTripCount > 0 ? (stats.totalSurgeMultiplier / stats.surgeTripCount).toFixed(2) : 0,
                 splitFareCount: stats.splitFareCount,
                 multiDestCount: stats.multiDestCount,
-                heatmapData: stats.heatmapData
+                heatmapData: stats.heatmapData,
+                heatmapData: stats.heatmapData,
+                maxStreak: calculateMaxStreak(stats.tripDates),
+                dayOfWeekCounts: stats.dayOfWeekCounts
             };
         }
 
@@ -383,6 +573,15 @@
             if (itemName) {
                 stats.itemCounts[itemName] = (stats.itemCounts[itemName] || 0) + parseInt(o.Item_quantity || 1);
             }
+
+            // Track order date for streak calculation
+            const dateStr = o.Request_Time_Local;
+            if (dateStr) {
+                const date = new Date(dateStr);
+                const orderDate = date.toISOString().split('T')[0];
+                stats.orderDates.add(orderDate);
+                stats.dayOfWeekCounts[date.getDay()]++;
+            }
         }
 
         function formatOrderStats(stats) {
@@ -404,7 +603,9 @@
                 totalOrders: Object.keys(stats.uniqueOrders).length,
                 totalSpent: stats.totalSpent.toFixed(2),
                 topRestaurants,
-                topItems
+                topItems,
+                maxStreak: calculateMaxStreak(stats.orderDates),
+                dayOfWeekCounts: stats.dayOfWeekCounts
             };
         }
 
@@ -476,11 +677,13 @@
                 totalTrips: 0, totalSpent: "0.00", totalMiles: "0.00",
                 topCities: [], timeOfDayCounts: { morning: 0, afternoon: 0, evening: 0, night: 0 },
                 rideTypes: [], surgeCount: 0, avgSurgeMultiplier: 0, splitFareCount: 0, multiDestCount: 0,
-                totalDurationHours: "0.0", heatmapData: { pickup: [], dropoff: [] }
+                totalDurationHours: "0.0", heatmapData: { pickup: [], dropoff: [] }, maxStreak: 0,
+                dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0]
             };
 
             const defaultOrderStats = {
-                totalOrders: 0, totalSpent: "0.00", topRestaurants: [], topItems: []
+                totalOrders: 0, totalSpent: "0.00", topRestaurants: [], topItems: [], maxStreak: 0,
+                dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0]
             };
 
             sortedYears.forEach(y => {
@@ -538,9 +741,18 @@
             for (const file of matchedFiles) {
                 try {
                     const content = await readFileAsText(file);
-                    const parsed = parseCSV(content);
-                    allData.push(...parsed);
-                    console.log(`Loaded ${parsed.length} rows from ${file.webkitRelativePath || file.name}`);
+                    const parsed = Papa.parse(content, {
+                        header: true,
+                        skipEmptyLines: true,
+                        dynamicTyping: false
+                    });
+                    
+                    if (parsed.errors && parsed.errors.length > 0) {
+                        console.warn(`Warnings/Errors parsing ${file.name}:`, parsed.errors);
+                    }
+
+                    allData.push(...parsed.data);
+                    console.log(`Loaded ${parsed.data.length} rows from ${file.webkitRelativePath || file.name}`);
                 } catch (e) {
                     console.warn(`Failed to read ${file.webkitRelativePath || file.name}:`, e);
                 }
@@ -686,8 +898,23 @@
             animateValue("multi-dest-count", 0, trips.multiDestCount, 1500);
 
             renderList("top-cities", trips.topCities, "trips", "city");
-            renderList("ride-types", trips.rideTypes, "", "type");
+            
+            // Pie Chart for Ride Types
+            const rideTypesLabels = trips.rideTypes.map(t => t.type);
+            const rideTypesData = trips.rideTypes.map(t => t.count);
+            renderChart('ride-types-chart', rideTypesLabels, rideTypesData);
+            
             renderTimeChart(trips.timeOfDayCounts);
+            renderDayOfWeekChart('day-of-week-chart', trips.dayOfWeekCounts);
+
+            // Ride Streak
+            const rideStreakCard = document.getElementById('ride-streak-card');
+            if (trips.maxStreak > 1) {
+                rideStreakCard.style.display = 'block';
+                animateValue("ride-streak", 0, trips.maxStreak, 1500);
+            } else {
+                rideStreakCard.style.display = 'none';
+            }
 
             // Eats
             const eats = yearData.eats;
@@ -696,19 +923,39 @@
 
             const eatsSpots = document.getElementById('eats-details-container');
             const eatsItems = document.getElementById('eats-items-container');
+            const eatsStreakCard = document.getElementById('eats-streak-card');
             const noEatsMsg = document.getElementById('no-eats-msg');
 
             if (eats.totalOrders > 0) {
                 eatsSpots.style.display = 'block';
                 eatsItems.style.display = 'block';
+                document.getElementById('eats-habits-container').style.display = 'block';
                 noEatsMsg.style.display = 'none';
                 renderList("top-restaurants", eats.topRestaurants, "orders", "name");
                 renderList("top-items", eats.topItems, "", "name");
+
+                // Eats Streak
+                if (eats.maxStreak > 1) {
+                    eatsStreakCard.style.display = 'block';
+                    animateValue("eats-streak", 0, eats.maxStreak, 1500);
+                } else {
+                    eatsStreakCard.style.display = 'none';
+                }
+
+                // Eats Day of Week Chart
+                renderDayOfWeekChart('eats-day-of-week-chart', eats.dayOfWeekCounts, '#05C46B');
+
             } else {
                 eatsSpots.style.display = 'none';
                 eatsItems.style.display = 'none';
+                document.getElementById('eats-habits-container').style.display = 'none';
+                eatsStreakCard.style.display = 'none';
                 noEatsMsg.style.display = 'block';
             }
+
+            // Setup Share Buttons
+            document.getElementById('share-rides-btn').onclick = () => generateScreenshot('rides', year, trips);
+            document.getElementById('share-eats-btn').onclick = () => generateScreenshot('eats', year, eats);
 
             // Map
             renderMap(trips.heatmapData);
@@ -837,6 +1084,239 @@
                     bar.style.height = Math.max(pct, 5) + '%';
                 }, 200);
             });
+        }
+
+
+        let charts = {}; // Store charts to destroy them before re-rendering
+
+        function renderChart(canvasId, labels, data, animate = true) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+
+            charts[canvasId] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#276EF1',
+                            '#05C46B',
+                            '#FFD700',
+                            '#FF4500',
+                            '#888888',
+                            '#ffffff'
+                        ],
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    animation: animate ? {} : false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#A0A0A0',
+                                font: {
+                                    family: 'Inter',
+                                    size: 11
+                                },
+                                boxWidth: 12
+                            }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            font: { weight: 'bold', size: 10 },
+                            formatter: (value, ctx) => {
+                                let sum = 0;
+                                let dataArr = ctx.chart.data.datasets[0].data;
+                                dataArr.map(data => { sum += data; });
+                                let percentage = (value * 100 / sum).toFixed(0) + "%";
+                                return percentage;
+                            },
+                            display: (context) => {
+                                let dataset = context.dataset;
+                                let value = dataset.data[context.dataIndex];
+                                let total = dataset.data.reduce((a, b) => a + b, 0);
+                                return value > (total * 0.05); // Only show if > 5%
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                },
+                plugins: [typeof ChartDataLabels !== 'undefined' ? ChartDataLabels : {}]
+            });
+        }
+
+        function renderDayOfWeekChart(canvasId, data, color = '#276EF1', animate = true) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            // Defensive check for data
+            const chartData = (data && Array.isArray(data)) ? data : [0, 0, 0, 0, 0, 0, 0];
+            
+            // Log empty data for debugging but don't alert
+            if (chartData.every(v => v === 0)) {
+                console.warn(`Chart ${canvasId} has all zero data - check if data has dayOfWeekCounts`);
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+
+            charts[canvasId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: color,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    animation: animate ? {} : false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            display: false,
+                            beginAtZero: true,
+                            grid: { display: false }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#A0A0A0', font: { family: 'Inter' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateScreenshot(type, year, stats) {
+            try {
+                const templateId = type === 'rides' ? 'rides-share-template' : 'eats-share-template';
+                const template = document.getElementById(templateId);
+                
+                // Populate Template Data
+                if (type === 'rides') {
+                document.getElementById('share-rides-year').textContent = year === 'Lifetime' ? 'All Time' : year;
+                document.getElementById('share-rides-count').textContent = stats.totalTrips;
+                document.getElementById('share-rides-miles').textContent = Math.round(parseFloat(stats.totalMiles)).toLocaleString();
+                
+                // Populating lists in template
+                const destContainer = document.getElementById('share-rides-destinations');
+                destContainer.innerHTML = '';
+                stats.topCities.slice(0, 3).forEach(item => {
+                    destContainer.innerHTML += `
+                        <div class="list-row">
+                            <span class="list-row-name">${item.city}</span>
+                            <span class="list-row-count">${item.count}</span>
+                        </div>`;
+                });
+                
+                // Moved Ride Types out of screenshot as requested by user
+                
+                // Weekly Habits (Day of Week)
+                renderDayOfWeekChart('share-rides-dow-chart', stats.dayOfWeekCounts || [0,0,0,0,0,0,0], '#276EF1', false);
+
+                // Streak Badge for Rides
+                const streakBadge = document.getElementById('share-rides-streak-badge');
+                if (stats.maxStreak > 1) {
+                    streakBadge.style.display = 'flex';
+                    document.getElementById('share-rides-streak').textContent = stats.maxStreak;
+                } else {
+                    streakBadge.style.display = 'none';
+                }
+
+                // Time Chart for Share
+                 const timeContainer = document.getElementById('share-rides-time-chart');
+                 timeContainer.innerHTML = '';
+                 const times = stats.timeOfDayCounts;
+                 const maxVal = Math.max(times.morning || 0, times.afternoon || 0, times.evening || 0, times.night || 0) || 1;
+                 const timeLabels = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', night: 'Night' };
+                 Object.keys(timeLabels).forEach(k => {
+                    const count = times[k] || 0;
+                    const pct = (count / maxVal) * 100;
+                    timeContainer.innerHTML += `
+                        <div class="time-bar">
+                            <div class="time-bar-fill ${k}" style="height: ${Math.max(pct, 5)}%"></div>
+                            <div class="time-bar-label">${timeLabels[k]}</div>
+                        </div>`;
+                 });
+
+            } else {
+                document.getElementById('share-eats-year').textContent = year === 'Lifetime' ? 'All Time' : year;
+                document.getElementById('share-eats-count').textContent = stats.totalOrders;
+                
+                const restContainer = document.getElementById('share-eats-restaurants');
+                restContainer.innerHTML = '';
+                stats.topRestaurants.slice(0, 3).forEach(item => {
+                    restContainer.innerHTML += `
+                        <div class="list-row">
+                            <span class="list-row-name">${item.name}</span>
+                            <span class="list-row-count">${item.count}</span>
+                        </div>`;
+                });
+
+                const itemsContainer = document.getElementById('share-eats-items');
+                itemsContainer.innerHTML = '';
+                stats.topItems.slice(0, 3).forEach(item => {
+                    itemsContainer.innerHTML += `
+                        <div class="list-row">
+                            <span class="list-row-name">${item.name}</span>
+                            <span class="list-row-count">${item.count}</span>
+                        </div>`;
+                });
+
+                // Streak Badge for Eats
+                 const streakBadge = document.getElementById('share-eats-streak-badge');
+                 if (stats.maxStreak > 1) {
+                     streakBadge.style.display = 'flex';
+                     document.getElementById('share-eats-streak').textContent = stats.maxStreak;
+                 } else {
+                     streakBadge.style.display = 'none';
+                 }
+
+                 // Eats Day of Week Chart (Green)
+                 renderDayOfWeekChart('share-eats-dow-chart', stats.dayOfWeekCounts || [0,0,0,0,0,0,0], '#05C46B', false);
+            }
+
+            // Generate Image
+            // Small delay to ensure chart renders (even with no animation, canvas needs a tick)
+            setTimeout(() => {
+                html2canvas(template, {
+                    scale: 2, // Better quality
+                    backgroundColor: null,
+                    logging: false,
+                    useCORS: true
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `UberWrapped-${type}-${year}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }).catch(err => {
+                    console.error('Screenshot failed:', err);
+                    alert('Failed to generate screenshot: ' + err.message);
+                });
+            }, 500); 
+            } catch (e) {
+                console.error("Error preparing screenshot:", e);
+                alert("Error preparing screenshot: " + e.message);
+            }
         }
 
         function animateValue(id, start, end, duration) {
