@@ -301,7 +301,7 @@
             </div>
             <div class="list-section">
                 <div class="list-title">Weekly Habits</div>
-                <div class="chart-container" style="position: relative; height: 200px; width: 100%;">
+                <div class="chart-container" style="position: relative; height: 280px; width: 100%;">
                      <canvas id="share-rides-dow-chart"></canvas>
                 </div>
             </div>
@@ -311,7 +311,7 @@
             </div>
         </div>
         <div class="template-footer">
-            <div class="template-url">palmerac.github.io/uber-wrapped</div>
+            <div class="template-url">uber-wrapped.pages.dev</div>
             <div class="template-cta">Create your own Uber Wrapped!</div>
         </div>
     </div>
@@ -345,13 +345,13 @@
             <!-- Eats Day of Week section in share template -->
              <div class="list-section">
                  <div class="list-title">Weekly Habits</div>
-                 <div class="chart-container" style="position: relative; height: 200px; width: 100%;">
+                 <div class="chart-container" style="position: relative; height: 350px; width: 100%;">
                       <canvas id="share-eats-dow-chart"></canvas>
                  </div>
              </div>
         </div>
         <div class="template-footer">
-            <div class="template-url">palmerac.github.io/uber-wrapped</div>
+            <div class="template-url">uber-wrapped.pages.dev</div>
             <div class="template-cta">Create your own Uber Wrapped!</div>
         </div>
     </div>
@@ -1264,7 +1264,7 @@
                 
                 const restContainer = document.getElementById('share-eats-restaurants');
                 restContainer.innerHTML = '';
-                stats.topRestaurants.slice(0, 3).forEach(item => {
+                stats.topRestaurants.slice(0, 4).forEach(item => {
                     restContainer.innerHTML += `
                         <div class="list-row">
                             <span class="list-row-name">${item.name}</span>
@@ -1274,7 +1274,7 @@
 
                 const itemsContainer = document.getElementById('share-eats-items');
                 itemsContainer.innerHTML = '';
-                stats.topItems.slice(0, 3).forEach(item => {
+                stats.topItems.slice(0, 4).forEach(item => {
                     itemsContainer.innerHTML += `
                         <div class="list-row">
                             <span class="list-row-name">${item.name}</span>
@@ -1304,10 +1304,43 @@
                     logging: false,
                     useCORS: true
                 }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `UberWrapped-${type}-${year}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
+                    const filename = `UberWrapped-${type}-${year}.png`;
+                    
+                    // Universal download function that works across all browsers
+                    const downloadImage = (blob) => {
+                        // Try using the download attribute first (Chrome, Firefox, Edge)
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.style.display = 'none';
+                        link.href = url;
+                        link.download = filename;
+                        link.setAttribute('download', filename);
+                        link.setAttribute('target', '_blank');
+                        document.body.appendChild(link);
+                        
+                        // Use a small timeout to ensure the link is in the DOM
+                        setTimeout(() => {
+                            link.click();
+                            // Cleanup
+                            setTimeout(() => {
+                                document.body.removeChild(link);
+                                URL.revokeObjectURL(url);
+                            }, 250);
+                        }, 100);
+                    };
+                    
+                    // Convert canvas to blob with explicit type
+                    canvas.toBlob(blob => {
+                        if (!blob) {
+                            console.error('Failed to create blob from canvas');
+                            alert('Failed to generate screenshot. Please try again.');
+                            return;
+                        }
+                        
+                        // Create a new blob with explicit type to ensure proper file association
+                        const pngBlob = new Blob([blob], { type: 'image/png' });
+                        downloadImage(pngBlob);
+                    }, 'image/png', 1.0);
                 }).catch(err => {
                     console.error('Screenshot failed:', err);
                     alert('Failed to generate screenshot: ' + err.message);

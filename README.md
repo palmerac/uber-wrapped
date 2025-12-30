@@ -21,6 +21,8 @@ A beautiful, privacy-first dashboard that visualizes your Uber ride and Uber Eat
 2. **Drop & Go** — Drag and drop your downloaded `Uber Data` folder onto the page
 3. **Explore** — View your personalized travel and food stats instantly
 
+For a detailed breakdown of how spend, distances, and special stats are calculated, see [DATA_LOGIC.md](./DATA_LOGIC.md).
+
 ## Tech Stack
 
 - Vanilla HTML, CSS, JavaScript (no frameworks)

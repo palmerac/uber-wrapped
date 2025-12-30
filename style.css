@@ -805,3 +805,320 @@ footer a:hover {
         padding: 10px 12px;
     }
 }
+
+/* ==========================================
+   SHARE BUTTONS & TEMPLATES
+   ========================================== */
+
+.share-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 100px;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.share-btn.rides {
+    background: linear-gradient(135deg, #276EF1 0%, #1e54ca 100%);
+    color: #fff;
+}
+
+.share-btn.eats {
+    background: linear-gradient(135deg, #05C46B 0%, #04a358 100%);
+    color: #fff;
+}
+
+.share-btn .icon {
+    font-size: 1.1rem;
+}
+
+/* Hidden Share Templates - Portrait for IG Stories (1080x1920) */
+.share-template {
+    position: fixed;
+    left: -9999px;
+    top: 0;
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(170deg, #0a0a0a 0%, #000 40%, #0d0d1a 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #fff;
+    overflow: hidden;
+}
+
+.share-template.rides-template {
+    background: linear-gradient(170deg, #0a0a0a 0%, #000 30%, #0a1428 100%);
+}
+
+.share-template.eats-template {
+    background: linear-gradient(170deg, #0a0a0a 0%, #000 30%, #0a1a12 100%);
+}
+
+.share-template .template-header {
+    text-align: center;
+    padding: 60px 60px 30px;
+}
+
+.share-template .template-logo {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.share-template .template-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin: 0;
+    color: #fff;
+    background: none;
+    -webkit-text-fill-color: unset;
+}
+
+.share-template .template-year {
+    font-size: 4rem;
+    font-weight: 800;
+    margin: 8px 0 0;
+    letter-spacing: -2px;
+}
+
+.share-template.rides-template .template-year {
+    background: linear-gradient(135deg, #276EF1 0%, #5a9aff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.share-template.eats-template .template-year {
+    background: linear-gradient(135deg, #05C46B 0%, #3dff9a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.share-template .template-content {
+    padding: 20px 60px;
+}
+
+.share-template .big-stat {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.share-template .big-stat-value {
+    font-size: 5rem;
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 1;
+}
+
+.share-template .big-stat-label {
+    font-size: 1.4rem;
+    color: #888;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.share-template .stats-row {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 24px;
+    padding: 20px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.share-template .stat-item {
+    text-align: center;
+}
+
+.share-template .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.share-template .stat-label {
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.share-template .list-section {
+    margin-bottom: 24px;
+}
+
+.share-template .list-title {
+    font-size: 1.2rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+}
+
+.share-template .list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.share-template .list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.share-template .list-row-name {
+    font-size: 1.6rem;
+    font-weight: 500;
+}
+
+.share-template .list-row-count {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #888;
+}
+
+.share-template .time-chart-share {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 220px;
+    padding: 30px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 40px;
+}
+
+.share-template .time-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 22%;
+    height: 100%;
+}
+
+.share-template .time-bar-fill {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    min-height: 10px;
+}
+
+.share-template .time-bar-fill.morning {
+    background: linear-gradient(to top, #FFD700, #ffec8b);
+}
+
+.share-template .time-bar-fill.afternoon {
+    background: linear-gradient(to top, #FFA500, #ffc76b);
+}
+
+.share-template .time-bar-fill.evening {
+    background: linear-gradient(to top, #FF4500, #ff7b4d);
+}
+
+.share-template .time-bar-fill.night {
+    background: linear-gradient(to top, #4834d4, #686de0);
+}
+
+.share-template .time-bar-label {
+    font-size: 1rem;
+    color: #666;
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.share-template .streak-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.1) 100%);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 16px;
+    margin-bottom: 24px;
+}
+
+.share-template .streak-fire {
+    font-size: 3rem;
+}
+
+.share-template .streak-text {
+    text-align: left;
+}
+
+.share-template .streak-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #FFD700;
+    line-height: 1;
+}
+
+.share-template .streak-label {
+    font-size: 1rem;
+    color: #ccc;
+    margin-top: 4px;
+}
+
+.share-template .template-footer {
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 0 60px;
+}
+
+.share-template .template-url {
+    font-size: 1.4rem;
+    color: #666;
+    letter-spacing: 1px;
+}
+
+.share-template .template-cta {
+    font-size: 1.1rem;
+    color: #444;
+    margin-top: 10px;
+}
+
+/* Streak Card Styles for Dashboard */
+.streak-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.05) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.streak-card .card-value {
+    color: #FFD700;
+}
+
+.streak-icon {
+    font-size: 1.2rem;
+    margin-right: 4px;
+}
