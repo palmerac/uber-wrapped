@@ -117,7 +117,8 @@ function initStats() {
         heatmapData: { pickup: [], dropoff: [] },
         tripDates: new Set(),    // Track unique dates for streak calculation
         orderDates: new Set(),   // Track unique order dates for streak calculation
-        dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0] // 0=Sun, 6=Sat
+        dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0], // 0=Sun, 6=Sat
+        orderTimeOfDayCounts: { morning: 0, afternoon: 0, evening: 0, night: 0 }
     };
 }
 
@@ -303,6 +304,13 @@ function updateOrderStats(stats, o) {
             const orderDate = date.toISOString().split('T')[0];
             stats.orderDates.add(orderDate);
             stats.dayOfWeekCounts[date.getDay()]++;
+            
+            // Time of day for orders
+            const hour = date.getHours();
+            if (hour >= 5 && hour < 12) stats.orderTimeOfDayCounts.morning++;
+            else if (hour >= 12 && hour < 17) stats.orderTimeOfDayCounts.afternoon++;
+            else if (hour >= 17 && hour < 21) stats.orderTimeOfDayCounts.evening++;
+            else stats.orderTimeOfDayCounts.night++;
         }
     }
 }
@@ -328,7 +336,8 @@ function formatOrderStats(stats) {
         topRestaurants,
         topItems,
         maxStreak: calculateMaxStreak(stats.orderDates),
-        dayOfWeekCounts: stats.dayOfWeekCounts
+        dayOfWeekCounts: stats.dayOfWeekCounts,
+        timeOfDayCounts: stats.orderTimeOfDayCounts
     };
 }
 
@@ -414,7 +423,8 @@ try {
 
     const defaultOrderStats = {
         totalOrders: 0, totalSpent: "0.00", topRestaurants: [], topItems: [],
-        maxStreak: 0, dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0]
+        maxStreak: 0, dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0],
+        timeOfDayCounts: { morning: 0, afternoon: 0, evening: 0, night: 0 }
     };
 
 

@@ -214,6 +214,7 @@
              <div class="eats-header">Good Eats</div>
              
              <div class="eats-grid">
+                <!-- Row 1: Main Stats -->
                 <div class="sub-stat-card">
                     <div class="card-label">Orders Placed</div>
                     <div class="card-value text-green" id="total-orders">0</div>
@@ -235,19 +236,27 @@
                     <div class="card-label">Top Cravings</div>
                      <div class="list-container" id="top-items"></div>
                 </div>
+             </div>
 
-                <div class="sub-stat-card streak-card" id="eats-streak-card" style="display: none;">
-                    <div class="card-label"><span class="streak-icon">🔥</span> Order Streak</div>
-                    <div class="card-value text-green" id="eats-streak">0</div>
-                    <div class="card-sub">Days in a row</div>
-                </div>
-
-                <div class="sub-stat-card" id="eats-habits-container" style="display: none;">
+             <!-- Row 2: Charts & Habits -->
+             <div class="eats-charts-row" id="eats-habits-container" style="display: none;">
+                <div class="sub-stat-card">
                     <div class="card-label">Weekly Habits</div>
-                    <div class="chart-container" style="position: relative; height: 160px; width: 100%;">
+                    <div class="chart-container" style="position: relative; height: 140px; width: 100%;">
                         <canvas id="eats-day-of-week-chart"></canvas>
                     </div>
                 </div>
+
+                <div class="sub-stat-card time-chart-container">
+                    <div class="card-label">When You Order</div>
+                    <div class="bar-chart" id="eats-time-chart"></div>
+                </div>
+             </div>
+
+             <div class="sub-stat-card streak-card eats-streak" id="eats-streak-card" style="display: none; margin-top: 16px;">
+                 <div class="card-label"><span class="streak-icon">🔥</span> Order Streak</div>
+                 <div class="card-value text-green" id="eats-streak">0</div>
+                 <div class="card-sub">Days in a row</div>
              </div>
 
              <div id="no-eats-msg" style="text-align: center; font-size: 1.25rem; opacity: 0.6; padding: 40px; display: none;">
@@ -388,7 +397,8 @@
                 heatmapData: { pickup: [], dropoff: [] },
                 tripDates: new Set(),    // Track unique dates for streak calculation
                 orderDates: new Set(),   // Track unique order dates for streak calculation
-                dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0] // 0=Sun, 6=Sat
+                dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0], // 0=Sun, 6=Sat
+                orderTimeOfDayCounts: { morning: 0, afternoon: 0, evening: 0, night: 0 }
             };
         }
 
@@ -574,13 +584,20 @@
                 stats.itemCounts[itemName] = (stats.itemCounts[itemName] || 0) + parseInt(o.Item_quantity || 1);
             }
 
-            // Track order date for streak calculation
+            // Track order date for streak calculation and time of day
             const dateStr = o.Request_Time_Local;
             if (dateStr) {
                 const date = new Date(dateStr);
                 const orderDate = date.toISOString().split('T')[0];
                 stats.orderDates.add(orderDate);
                 stats.dayOfWeekCounts[date.getDay()]++;
+                
+                // Time of day for orders
+                const hour = date.getHours();
+                if (hour >= 5 && hour < 12) stats.orderTimeOfDayCounts.morning++;
+                else if (hour >= 12 && hour < 17) stats.orderTimeOfDayCounts.afternoon++;
+                else if (hour >= 17 && hour < 21) stats.orderTimeOfDayCounts.evening++;
+                else stats.orderTimeOfDayCounts.night++;
             }
         }
 
@@ -605,7 +622,8 @@
                 topRestaurants,
                 topItems,
                 maxStreak: calculateMaxStreak(stats.orderDates),
-                dayOfWeekCounts: stats.dayOfWeekCounts
+                dayOfWeekCounts: stats.dayOfWeekCounts,
+                timeOfDayCounts: stats.orderTimeOfDayCounts
             };
         }
 
@@ -683,7 +701,8 @@
 
             const defaultOrderStats = {
                 totalOrders: 0, totalSpent: "0.00", topRestaurants: [], topItems: [], maxStreak: 0,
-                dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0]
+                dayOfWeekCounts: [0, 0, 0, 0, 0, 0, 0],
+                timeOfDayCounts: { morning: 0, afternoon: 0, evening: 0, night: 0 }
             };
 
             sortedYears.forEach(y => {
@@ -864,8 +883,11 @@
                 yearSelect.appendChild(opt);
             });
 
-            if (sortedYears.length > 0) {
-                loadYear(sortedYears[0]);
+            // Default to the most recent year (index 1, since Lifetime is at 0)
+            const defaultYear = sortedYears.length > 1 ? sortedYears[1] : sortedYears[0];
+            if (defaultYear) {
+                yearSelect.value = defaultYear;
+                loadYear(defaultYear);
             }
 
             yearSelect.addEventListener('change', (e) => {
@@ -929,7 +951,7 @@
             if (eats.totalOrders > 0) {
                 eatsSpots.style.display = 'block';
                 eatsItems.style.display = 'block';
-                document.getElementById('eats-habits-container').style.display = 'block';
+                document.getElementById('eats-habits-container').style.display = 'grid';
                 noEatsMsg.style.display = 'none';
                 renderList("top-restaurants", eats.topRestaurants, "orders", "name");
                 renderList("top-items", eats.topItems, "", "name");
@@ -944,6 +966,9 @@
 
                 // Eats Day of Week Chart
                 renderDayOfWeekChart('eats-day-of-week-chart', eats.dayOfWeekCounts, '#05C46B');
+
+                // Eats Time of Day Chart
+                renderEatsTimeChart(eats.timeOfDayCounts);
 
             } else {
                 eatsSpots.style.display = 'none';
@@ -1076,6 +1101,34 @@
                 bar.style.height = '4px';
                 bar.innerHTML = `
                     <div class="bar-tooltip">${count} rides</div>
+                    <div class="bar-label">${timeLabels[k]}</div>
+                `;
+                container.appendChild(bar);
+
+                setTimeout(() => {
+                    bar.style.height = Math.max(pct, 5) + '%';
+                }, 200);
+            });
+        }
+
+        function renderEatsTimeChart(times) {
+            const container = document.getElementById('eats-time-chart');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!times) return;
+
+            const maxVal = Math.max(times.morning || 0, times.afternoon || 0, times.evening || 0, times.night || 0) || 1;
+            const timeLabels = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', night: 'Night' };
+
+            Object.keys(timeLabels).forEach(k => {
+                const count = times[k] || 0;
+                const pct = (count / maxVal) * 100;
+                const bar = document.createElement('div');
+                bar.className = `bar ${k}`;
+                bar.style.height = '4px';
+                bar.innerHTML = `
+                    <div class="bar-tooltip">${count} orders</div>
                     <div class="bar-label">${timeLabels[k]}</div>
                 `;
                 container.appendChild(bar);
@@ -1307,9 +1360,32 @@
                     const filename = `UberWrapped-${type}-${year}.png`;
                     
                     // Universal download function that works across all browsers
-                    const downloadImage = (blob) => {
-                        // Try using the download attribute first (Chrome, Firefox, Edge)
-                        const url = URL.createObjectURL(blob);
+                    const downloadImage = async (blob) => {
+                        const pngBlob = new Blob([blob], { type: 'image/png' });
+                        
+                        // Check if Web Share API with files is supported (iOS Safari, some Android)
+                        // This allows saving directly to Photos on iOS
+                        if (navigator.canShare && navigator.canShare({ files: [new File([pngBlob], filename, { type: 'image/png' })] })) {
+                            try {
+                                const file = new File([pngBlob], filename, { type: 'image/png' });
+                                await navigator.share({
+                                    files: [file],
+                                    title: 'Uber Wrapped',
+                                    text: 'My Uber Wrapped ' + year
+                                });
+                                return; // Share successful
+                            } catch (err) {
+                                // User cancelled or share failed, fall through to download
+                                if (err.name !== 'AbortError') {
+                                    console.log('Share failed, falling back to download:', err);
+                                } else {
+                                    return; // User cancelled, don't download
+                                }
+                            }
+                        }
+                        
+                        // Fallback: Standard download (desktop browsers, non-iOS)
+                        const url = URL.createObjectURL(pngBlob);
                         const link = document.createElement('a');
                         link.style.display = 'none';
                         link.href = url;
@@ -1337,9 +1413,7 @@
                             return;
                         }
                         
-                        // Create a new blob with explicit type to ensure proper file association
-                        const pngBlob = new Blob([blob], { type: 'image/png' });
-                        downloadImage(pngBlob);
+                        downloadImage(blob);
                     }, 'image/png', 1.0);
                 }).catch(err => {
                     console.error('Screenshot failed:', err);

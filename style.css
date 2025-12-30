@@ -269,8 +269,15 @@ select#year-select:focus {
 
 .eats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
+}
+
+.eats-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
 }
 
 /* Common Card Elements */
@@ -700,6 +707,14 @@ footer a:hover {
         grid-template-columns: 1fr 1fr;
     }
 
+    .eats-charts-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .eats-charts-row .streak-card {
+        grid-column: span 2;
+    }
+
     /* Landing page mobile */
     .landing-title {
         font-size: 2.5rem;
@@ -763,6 +778,14 @@ footer a:hover {
 
     .eats-grid {
         grid-template-columns: 1fr;
+    }
+
+    .eats-charts-row {
+        grid-template-columns: 1fr;
+    }
+
+    .eats-charts-row .streak-card {
+        grid-column: span 1;
     }
 
     /* Landing page mobile small */
