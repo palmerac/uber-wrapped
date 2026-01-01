@@ -801,10 +801,21 @@
                 showDashboard();
                 initializeDashboard();
 
+                // Track successful data processing
+                gtag('event', 'data_processed', {
+                    'trip_count': tripData.length,
+                    'order_count': orderData.length
+                });
+
             } catch (err) {
                 console.error('Error processing data:', err);
                 showLoading(false);
                 showError(err.message || 'Failed to process data. Please try again.');
+                
+                // Track errors
+                gtag('event', 'data_error', {
+                    'error_message': err.message
+                });
             }
         }
 
@@ -900,6 +911,11 @@
         function switchMode(mode) {
             currentMode = mode;
             
+            // Track mode switch
+            gtag('event', 'switch_mode', {
+                'mode': mode
+            });
+            
             // Toggle Buttons
             document.getElementById('mode-rides').classList.toggle('active', mode === 'rides');
             document.getElementById('mode-eats').classList.toggle('active', mode === 'eats');
@@ -956,6 +972,11 @@
             const data = window.UBER_DATA;
             const yearData = data.years[year];
             if (!yearData) return;
+
+            // Track year view
+            gtag('event', 'view_year', {
+                'year': year
+            });
 
             currentYearStats = yearData;
             currentYearLabel = year;
@@ -1299,6 +1320,12 @@
         }
 
         function generateScreenshot(type, year, stats) {
+            // Track download/share intent
+            gtag('event', 'share_download', {
+                'content_type': type,
+                'year': year
+            });
+
             try {
                 const templateId = type === 'rides' ? 'rides-share-template' : 'eats-share-template';
                 const template = document.getElementById(templateId);
