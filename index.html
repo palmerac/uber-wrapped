@@ -78,6 +78,9 @@
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <!-- html2canvas for screenshot export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -119,158 +122,98 @@
     </section>
 
     <!-- Dashboard (hidden until data is loaded) -->
-    <section id="dashboard" class="container" style="display: none;" aria-label="Uber Statistics Dashboard">
-        <header>
-            <div class="header-left">
-                <h1>Uber Wrapped.</h1>
-                <div class="subtitle">Your Life on the Move</div>
-            </div>
-            
-            <div class="profile-bar" id="profile-section">
-                <!-- Injected via JS -->
-            </div>
-
-            <div class="header-controls">
-                <div class="year-selector-container">
-                    <select id="year-select"></select>
-                    <span class="year-arrow">▼</span>
-                </div>
-                <button class="reset-button" id="reset-btn" title="Load different data">↻</button>
-            </div>
-        </header>
-
-        <!-- Hero Section (New) -->
-        <section class="hero-section" id="hero-section">
-            <div class="hero-eyebrow">Uber Wrapped</div>
-            <h2 class="hero-title" id="hero-title">Rides Wrapped</h2>
-
-            <div class="hero-big-stat">
-                <span id="hero-primary-value">0</span>
-                <span id="hero-primary-label">Rides</span>
-            </div>
-
-            <div class="hero-meta-row" id="hero-meta-row">
-                <!-- Injected via JS -->
-            </div>
+    <!-- Dashboard (Story Mode) -->
+    <section id="dashboard" style="display: none;" aria-label="Uber Statistics Dashboard">
+        
+        <!-- SLIDE 1: INTRO -->
+        <section class="story-slide">
+            <div class="story-eyebrow">Uber Wrapped</div>
+            <h1 class="story-title" id="story-year-title">2024</h1>
+            <p class="story-subtitle">Your year in motion.</p>
         </section>
 
-        <!-- Mode Toggle -->
-        <div class="mode-toggle">
-            <button data-mode="rides" class="mode-btn active" id="mode-rides">Rides</button>
-            <button data-mode="eats" class="mode-btn" id="mode-eats">Eats</button>
-        </div>
-
-        <!-- RIDES SECTION -->
-        <section id="rides-section" class="mode-content-section">
-            
-            <!-- Map Section -->
-            <div class="section-container">
-                <div class="map-container">
-                    <div id="trip-map"></div>
-                    <div class="map-legend">
-                        <div class="legend-item"><div class="legend-dot pickup"></div><span>Pickups</span></div>
-                        <div class="legend-item"><div class="legend-dot dropoff"></div><span>Dropoffs</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Behavior Section -->
-            <section class="section behavior-section">
-                <h3>Your Habits</h3>
-                <div class="behavior-grid">
-                    <div class="chart-card">
-                        <h4>Weekly Habits</h4>
-                        <div class="chart-container-inner">
-                            <canvas id="day-of-week-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <h4>Time of Day</h4>
-                        <div class="bar-chart" id="time-chart"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Favorites Section (Lists) -->
-            <section class="section favorites-section">
-                <h3>Where You Went</h3>
-                <div class="ranked-list" id="top-cities"></div>
-            </section>
-
-            <!-- Highlights Section -->
-            <section class="section highlights-section">
-                <h3>Highlights</h3>
-                <div class="highlight-row" id="rides-highlights">
-                    <!-- Chips injected via JS -->
-                </div>
-            </section>
+        <!-- SLIDE 2: TOTAL RIDES -->
+        <section class="story-slide">
+            <div class="story-eyebrow">The Hustle</div>
+            <div class="story-stat" id="story-total-rides">0</div>
+            <h2 class="story-title">Trips Taken</h2>
+            <p class="story-subtitle" id="story-time-spent">That's 0 hours spent in the back seat.</p>
         </section>
 
-        <!-- EATS SECTION (Hidden by default) -->
-        <section id="eats-section" class="mode-content-section" style="display: none;">
-            
-            <!-- Behavior Section -->
-            <section class="section behavior-section">
-                <h3>Your Habits</h3>
-                <div class="behavior-grid">
-                    <div class="chart-card">
-                        <h4>Weekly Habits</h4>
-                        <div class="chart-container-inner">
-                            <canvas id="eats-day-of-week-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <h4>When You Order</h4>
-                        <div class="bar-chart" id="eats-time-chart"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Favorites Section -->
-            <section class="section favorites-section">
-                <h3>Your Favorites</h3>
-                <div class="two-col-list">
-                    <div>
-                        <h4>Top Restaurants</h4>
-                        <div class="ranked-list" id="top-restaurants"></div>
-                    </div>
-                    <div>
-                        <h4>Top Cravings</h4>
-                        <div class="ranked-list" id="top-items"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Highlights Section -->
-            <section class="section highlights-section">
-                <h3>Highlights</h3>
-                <div class="highlight-row" id="eats-highlights">
-                    <!-- Chips injected via JS -->
-                </div>
-                
-                <div id="no-eats-msg" style="text-align: center; padding: 40px; display: none; opacity: 0.7;">
-                    Looks like you cooked at home this year! 🍳
-                </div>
-            </section>
+        <!-- SLIDE 3: DISTANCE -->
+        <section class="story-slide">
+            <div class="story-eyebrow">Distance Traveled</div>
+            <div class="story-stat" id="story-total-miles">0</div>
+            <h2 class="story-title">Miles</h2>
+            <p class="story-subtitle">You could have driven across the country <span id="story-x-times">0</span> times.</p>
         </section>
 
-        <!-- Share Section -->
-        <section class="share-section">
-            <h3>Share Your Wrapped</h3>
-            <div class="share-buttons">
-                <button class="share-btn rides" id="share-rides-btn">
+        <!-- SLIDE 4: TOP CITY -->
+        <section class="story-slide">
+            <div class="story-eyebrow">Top Destination</div>
+            <h2 class="story-title" id="story-top-city">City</h2>
+            <p class="story-subtitle">You really know your way around.</p>
+        </section>
+
+        <!-- SLIDE 5: SPEND (Rides) -->
+        <section class="story-slide">
+            <div class="story-eyebrow">Wallet Watch</div>
+            <div class="story-stat" id="story-ride-spend">$0</div>
+            <h2 class="story-title">Spent on Rides</h2>
+        </section>
+
+        <!-- SLIDE 6: EATS INTRO -->
+        <section class="story-slide" style="background: linear-gradient(180deg, #06402B 0%, #000 100%);">
+            <div class="story-eyebrow" style="color: #05C46B;">Switching Gears</div>
+            <h2 class="story-title">Let's Talk Food</h2>
+            <div class="story-stat">🍔</div>
+        </section>
+
+        <!-- SLIDE 7: TOTAL ORDERS -->
+        <section class="story-slide">
+            <div class="story-eyebrow">Cravings Satisfied</div>
+            <div class="story-stat" id="story-total-orders">0</div>
+            <h2 class="story-title">Uber Eats Orders</h2>
+        </section>
+
+        <!-- SLIDE 8: TOP RESTAURANT -->
+        <section class="story-slide">
+            <div class="story-eyebrow">The Regular</div>
+            <h2 class="story-title" id="story-top-restaurant">Restaurant</h2>
+            <p class="story-subtitle">You ordered here <span id="story-top-rest-count">0</span> times.</p>
+        </section>
+
+        <!-- SLIDE 9: EATS SPEND -->
+        <section class="story-slide">
+            <div class="story-eyebrow">Food Coma</div>
+            <div class="story-stat" id="story-eats-spend">$0</div>
+            <h2 class="story-title">Spent on Munchies</h2>
+        </section>
+
+        <!-- SLIDE 10: SHARE -->
+        <section class="story-slide">
+            <h2 class="story-title">That's a Wrap.</h2>
+            <div class="share-buttons" style="margin-top: 40px;">
+                <button class="share-btn rides" id="story-share-rides-btn">
                     <span class="icon">📸</span> Share Rides
                 </button>
-                <button class="share-btn eats" id="share-eats-btn">
+                <button class="share-btn eats" id="story-share-eats-btn">
                     <span class="icon">📸</span> Share Eats
                 </button>
             </div>
+            
+            <div class="header-controls" style="display: flex !important; margin-top: 60px; justify-content: center;">
+                 <div class="year-selector-container">
+                    <select id="year-select"></select>
+                    <span class="year-arrow">▼</span>
+                </div>
+            </div>
+            <footer>
+                <p style="margin-top: 20px;">Generated locally. Not affiliated with Uber.</p>
+                <p><a href="https://github.com/palmerac/uber-wrapped" target="_blank" rel="noopener noreferrer">View on GitHub</a></p>
+            </footer>
         </section>
 
-        <footer>
-            <p style="margin-top: 20px;">Generated locally from your data privacy export. Not affiliated with Uber.</p>
-            <p><a href="https://github.com/palmerac/uber-wrapped" target="_blank" rel="noopener noreferrer">View on GitHub</a></p>
-        </footer>
     </section>
     </main>
 
@@ -867,7 +810,7 @@
 
             // Profile
             const profileDiv = document.getElementById('profile-section');
-            if (data.profile) {
+            if (data.profile && profileDiv) {
                 profileDiv.innerHTML = `
                     <div class="profile-item"><span>Member Since</span> <b>${data.profile.memberSince}</b></div>
                     <div class="profile-item"><span>Rating</span> <b>${data.profile.avgRating} ★</b></div>
@@ -892,12 +835,15 @@
                 yearSelect.appendChild(opt);
             });
 
-            // Mode Toggles
-            document.getElementById('mode-rides').addEventListener('click', () => switchMode('rides'));
-            document.getElementById('mode-eats').addEventListener('click', () => switchMode('eats'));
+            // Default to '2025', then 'Lifetime', then most recent
+            let defaultYear = '2025';
+            if (!years.includes('2025')) {
+                 defaultYear = years.includes('Lifetime') ? 'Lifetime' : (sortedYears.length > 0 ? sortedYears[0] : null);
+            }
+            
+            // Show Dashboard Container (Story Mode)
+            document.getElementById('dashboard').style.display = 'block';
 
-            // Default to most recent year
-            const defaultYear = sortedYears.length > 1 ? sortedYears[1] : sortedYears[0];
             if (defaultYear) {
                 yearSelect.value = defaultYear;
                 loadYear(defaultYear);
@@ -908,116 +854,122 @@
             });
         }
 
-        function switchMode(mode) {
-            currentMode = mode;
-            
-            // Track mode switch
-            gtag('event', 'switch_mode', {
-                'mode': mode
-            });
-            
-            // Toggle Buttons
-            document.getElementById('mode-rides').classList.toggle('active', mode === 'rides');
-            document.getElementById('mode-eats').classList.toggle('active', mode === 'eats');
+        // Removed switchMode and updateHero as they are not used in Story Mode
 
-            // Toggle Sections
-            document.getElementById('rides-section').style.display = mode === 'rides' ? 'block' : 'none';
-            document.getElementById('eats-section').style.display = mode === 'eats' ? 'block' : 'none';
 
-            // Update Hero
-            updateHero();
-            
-            // Update Map if Rides
-            if (mode === 'rides' && map) {
-                setTimeout(() => map.invalidateSize(), 100);
-            }
-        }
 
-        function updateHero() {
-            if (!currentYearStats) return;
 
-            const trips = currentYearStats.trips;
-            const eats = currentYearStats.eats;
-            
-            // Animate Title
-            const titleEl = document.getElementById('hero-title');
-            titleEl.style.opacity = '0';
-            setTimeout(() => {
-                titleEl.textContent = currentMode === 'rides' ? 'Rides Wrapped' : 'Eats Wrapped';
-                titleEl.style.opacity = '1';
-            }, 200);
-
-            // Primary Stat
-            const primaryVal = currentMode === 'rides' ? trips.totalTrips : eats.totalOrders;
-            const primaryLabel = currentMode === 'rides' ? 'Rides' : 'Orders';
-            
-            animateValue("hero-primary-value", 0, primaryVal, 1000);
-            document.getElementById("hero-primary-label").textContent = primaryLabel;
-
-            // Meta Row
-            const metaRow = document.getElementById('hero-meta-row');
-            metaRow.innerHTML = '';
-
-            if (currentMode === 'rides') {
-                metaRow.innerHTML += `<div class="hero-meta-item"><span>${Math.round(trips.totalMiles).toLocaleString()}</span> <small>Miles</small></div>`;
-                metaRow.innerHTML += `<div class="hero-meta-item"><span>$${trips.totalSpent}</span> <small>Spent</small></div>`;
-            } else {
-                metaRow.innerHTML += `<div class="hero-meta-item"><span>$${eats.totalSpent}</span> <small>Spent</small></div>`;
-                const avgOrder = eats.totalOrders > 0 ? (parseFloat(eats.totalSpent)/eats.totalOrders).toFixed(2) : '0';
-                metaRow.innerHTML += `<div class="hero-meta-item"><span>$${avgOrder}</span> <small>/ Order</small></div>`;
-            }
-        }
 
         function loadYear(year) {
-            const data = window.UBER_DATA;
-            const yearData = data.years[year];
-            if (!yearData) return;
+            try {
+                const data = window.UBER_DATA;
+                const yearData = data.years[year];
+                if (!yearData) {
+                    console.error('No data found for year:', year);
+                    return;
+                }
 
-            // Track year view
-            gtag('event', 'view_year', {
-                'year': year
-            });
+                // Track year view
+                if (typeof gtag === 'function') {
+                    gtag('event', 'view_year', { 'year': year });
+                }
 
-            currentYearStats = yearData;
-            currentYearLabel = year;
-            updateHero();
+                currentYearStats = yearData;
+                currentYearLabel = year;
+                
+                // --- POPULATE STORY SLIDES ---
 
-            // --- RIDES ---
-            const trips = yearData.trips;
+                // 1. Intro
+                const titleEl = document.getElementById('story-year-title');
+                if (titleEl) titleEl.innerText = year === 'Lifetime' ? 'All Time' : year;
+
+                // 2. Rides Count
+                if (yearData.trips) {
+                    animateValue('story-total-rides', 0, yearData.trips.totalTrips, 1500);
+                    document.getElementById('story-time-spent').innerText = `That's ${yearData.trips.totalDurationHours} hours spent in the back seat.`;
+
+                    // 3. Distance
+                    animateValue('story-total-miles', 0, Math.floor(yearData.trips.totalMiles), 1500);
+                    
+                    const circumference = 24901; 
+                    const tripsAcrossUS = (yearData.trips.totalMiles / 2800).toFixed(1);
+                    
+                    let distanceFact = "";
+                    if (yearData.trips.totalMiles > 1000) {
+                        distanceFact = `That's like driving across the US ${tripsAcrossUS} times.`;
+                    } else {
+                        distanceFact = `That's ${(yearData.trips.totalMiles / 26.2).toFixed(1)} marathons.`;
+                    }
+                    const subtitle = document.querySelector('#story-total-miles + .story-title + .story-subtitle');
+                    if (subtitle) subtitle.innerText = distanceFact;
+
+                    // 4. Top City
+                    const city = (yearData.trips.topCities && yearData.trips.topCities.length > 0) 
+                                ? yearData.trips.topCities[0].city 
+                                : 'Unknown';
+                    document.getElementById('story-top-city').innerText = city;
+
+                    // 5. Ride Spend
+                    document.getElementById('story-ride-spend').innerText = '$' + Math.floor(yearData.trips.totalSpent).toLocaleString();
+                }
+
+                // EATS
+                if (yearData.eats) {
+                    // 7. Eats Orders
+                    animateValue('story-total-orders', 0, yearData.eats.totalOrders, 1500);
+
+                    // 8. Top Restaurant
+                    const restaurant = (yearData.eats.topRestaurants && yearData.eats.topRestaurants.length > 0) 
+                                ? yearData.eats.topRestaurants[0].name 
+                                : 'Your Kitchen';
+                    const rCount = (yearData.eats.topRestaurants && yearData.eats.topRestaurants.length > 0)
+                                ? yearData.eats.topRestaurants[0].count
+                                : 0;
+                    document.getElementById('story-top-restaurant').innerText = restaurant;
+                    document.getElementById('story-top-rest-count').innerText = rCount;
+
+                    // 9. Eats Spend
+                    document.getElementById('story-eats-spend').innerText = '$' + Math.floor(yearData.eats.totalSpent).toLocaleString();
+                }
+
+                
+                // Setup Share Buttons (Story Mode)
+                const shareRidesBtn = document.getElementById('story-share-rides-btn');
+                if (shareRidesBtn) shareRidesBtn.onclick = () => generateScreenshot('rides', year, yearData.trips);
+                
+                const shareEatsBtn = document.getElementById('story-share-eats-btn');
+                if (shareEatsBtn) shareEatsBtn.onclick = () => generateScreenshot('eats', year, yearData.eats);
+                
+                // Re-trigger animations if slides are already visible
+                setupObservers();
             
-            // Map
-            renderMap(trips.heatmapData);
-
-            // Charts
-            renderDayOfWeekChart('day-of-week-chart', trips.dayOfWeekCounts);
-            renderTimeChart(trips.timeOfDayCounts);
-
-            // Lists
-            renderList("top-cities", trips.topCities, "trips", "city");
-
-            // Highlights
-            renderHighlights('rides', trips);
-
-            // --- EATS ---
-            const eats = yearData.eats;
-            const noEatsMsg = document.getElementById('no-eats-msg');
-            const eatsSection = document.getElementById('eats-section');
-
-            if (eats.totalOrders > 0) {
-                noEatsMsg.style.display = 'none';
-                renderDayOfWeekChart('eats-day-of-week-chart', eats.dayOfWeekCounts, '#05C46B');
-                renderEatsTimeChart(eats.timeOfDayCounts);
-                renderList("top-restaurants", eats.topRestaurants, "orders", "name");
-                renderList("top-items", eats.topItems, "", "name");
-                renderHighlights('eats', eats);
-            } else {
-                noEatsMsg.style.display = 'block';
+            } catch (err) {
+                console.error('Error in loadYear:', err);
+                alert('Error loading year data: ' + err.message);
             }
-            
-            // Setup Share Buttons (Pass current stats)
-            document.getElementById('share-rides-btn').onclick = () => generateScreenshot('rides', year, trips);
-            document.getElementById('share-eats-btn').onclick = () => generateScreenshot('eats', year, eats);
         }
+
+        function setupObservers() {
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.story-slide').forEach(slide => {
+                    observer.observe(slide);
+                });
+            } else {
+                // Fallback for no observer support
+                document.querySelectorAll('.story-slide').forEach(slide => {
+                    slide.classList.add('visible');
+                });
+            }
+        }
+
 
         function renderHighlights(mode, stats) {
             const containerId = mode === 'rides' ? 'rides-highlights' : 'eats-highlights';
@@ -1587,14 +1539,16 @@
             });
 
             // Reset button
-            resetBtn.addEventListener('click', () => {
-                window.UBER_DATA = null;
-                map = null;
-                pickupLayer = null;
-                dropoffLayer = null;
-                document.getElementById('trip-map').innerHTML = '';
-                showDropzone();
-            });
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    window.UBER_DATA = null;
+                    map = null;
+                    pickupLayer = null;
+                    dropoffLayer = null;
+                    document.getElementById('trip-map').innerHTML = '';
+                    showDropzone();
+                });
+            }
         });
 
         // Try to load pre-generated data.js file

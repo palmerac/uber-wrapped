@@ -1,23 +1,42 @@
 :root {
-    --bg-color: #000000;
-    --text-primary: #FFFFFF;
-    --text-secondary: #A0A0A0;
-    --card-bg: #121212;
-    --card-border: #333333;
-    --accent-blue: #276EF1;
-    --accent-green: #05C46B;
+    --bg-color: #050505;
+    --text-primary: #EDEDED;
+    --text-secondary: #9CA3AF;
+    --card-bg: rgba(20, 20, 20, 0.6);
+    --card-border: rgba(255, 255, 255, 0.08);
+    /* More subtle border */
+    --accent-blue: #3b82f6;
+    /* More vibrant electric blue */
+    --accent-green: #10b981;
     --gradient-brand: linear-gradient(135deg, #276EF1 0%, #1e54ca 100%);
-    --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-heading: 'Syne', sans-serif;
+    --font-body: 'Manrope', sans-serif;
 }
 
 body {
     background-color: var(--bg-color);
     color: var(--text-primary);
-    font-family: var(--font-stack);
+    font-family: var(--font-body);
     margin: 0;
     padding: 0;
     min-height: 100vh;
     overflow-x: hidden;
+    position: relative;
+}
+
+/* Texture Overlay */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    opacity: 0.4;
 }
 
 .container {
@@ -40,21 +59,26 @@ header {
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-family: var(--font-heading);
+    font-size: 3rem;
     font-weight: 800;
-    letter-spacing: -2px;
+    letter-spacing: -1px;
+    /* Syne likes tighter tracking */
     margin: 0;
-    background: linear-gradient(to right, #fff, #888);
+    background: linear-gradient(to bottom right, #fff 30%, #aadaff 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
-    font-size: 1rem;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
     color: var(--text-secondary);
-    margin-top: 2px;
-    font-weight: 400;
+    margin-top: 4px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 /* Stats Header (Profile) */
@@ -137,10 +161,12 @@ select#year-select:focus {
 }
 
 .hero-title {
-    font-size: 3.5rem;
+    font-family: var(--font-heading);
+    font-size: 4.5rem;
+    /* Bigger for impact */
     font-weight: 800;
     margin: 0;
-    background: linear-gradient(to right, #fff, #aaa);
+    background: linear-gradient(180deg, #FFFFFF 0%, #999999 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -156,10 +182,15 @@ select#year-select:focus {
 }
 
 #hero-primary-value {
-    font-size: 8rem;
-    font-weight: 900;
-    letter-spacing: -4px;
-    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 10rem;
+    /* Massive */
+    font-weight: 800;
+    letter-spacing: -6px;
+    background: linear-gradient(180deg, #fff 20%, rgba(255, 255, 255, 0.4) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 #hero-primary-label {
@@ -234,7 +265,8 @@ select#year-select:focus {
 }
 
 .section h3 {
-    font-size: 1.5rem;
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
     margin-bottom: 24px;
     color: #fff;
     font-weight: 700;
@@ -243,13 +275,69 @@ select#year-select:focus {
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px);
     }
 
     to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Staggered Animations */
+.section,
+.chart-card,
+.list-item,
+.highlight-chip {
+    animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.hero-meta-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.hero-meta-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.hero-meta-item:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.highlight-row .highlight-chip:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.highlight-row .highlight-chip:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.highlight-row .highlight-chip:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.highlight-row .highlight-chip:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.ranked-list .list-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.ranked-list .list-item:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.ranked-list .list-item:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.ranked-list .list-item:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.ranked-list .list-item:nth-child(5) {
+    animation-delay: 0.3s;
 }
 
 /* BEHAVIOR / CHARTS */
@@ -1337,25 +1425,187 @@ footer a:hover {
     font-size: 1.2rem;
     margin-right: 4px;
 }
+
 /* NEW RESPONSIVE STYLES */
 @media (max-width: 768px) {
-    .behavior-grid, .two-col-list {
+
+    .behavior-grid,
+    .two-col-list {
         grid-template-columns: 1fr;
     }
-    
+
     .hero-title {
         font-size: 2.5rem;
     }
-    
+
     #hero-primary-value {
         font-size: 5rem;
     }
-    
+
     .hero-meta-row {
         gap: 20px;
     }
-    
+
     .mode-toggle {
         margin-bottom: 40px;
     }
+}
+
+/* ==========================================
+   STORY MODE / WRAPPED EXPERIENCE
+   ========================================== */
+
+html,
+body {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+}
+
+/* Hide Dashboard Elements we don't need in Story Mode, but keep footer for specific usage inside slide */
+.header-left,
+.header-controls,
+.section-container,
+.map-container,
+.map-legend,
+.mode-toggle {
+    display: none !important;
+}
+
+/* Ensure footer inside the story slide is visible and styled */
+.story-slide footer {
+    display: block !important;
+    margin-top: 40px;
+    font-size: 0.9rem;
+    color: #666;
+    opacity: 0.8;
+}
+
+.story-slide footer a {
+    color: #666;
+    text-decoration: underline;
+}
+
+/* Story Container */
+#dashboard {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+}
+
+/* Individual Slides */
+.story-slide {
+    height: 100vh;
+    width: 100%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative;
+    opacity: 0;
+    animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Alternating Backgrounds */
+.story-slide:nth-child(odd) {
+    background: linear-gradient(180deg, rgba(20, 20, 20, 0.8) 0%, rgba(5, 5, 5, 1) 100%);
+}
+
+.story-slide:nth-child(even) {
+    background: linear-gradient(180deg, rgba(5, 5, 5, 1) 0%, rgba(20, 20, 20, 0.8) 100%);
+}
+
+/* Typography for Story */
+.story-eyebrow {
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: var(--accent-blue);
+    margin-bottom: 24px;
+    opacity: 0.8;
+}
+
+.story-title {
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    /* Slightly smaller for better mobile fit */
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0 0 16px 0;
+    background: linear-gradient(to bottom right, #fff, #999);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.story-stat {
+    font-family: var(--font-heading);
+    font-size: 6rem;
+    /* Scaled down slightly */
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    margin: 24px 0;
+    letter-spacing: -4px;
+    text-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+}
+
+.story-subtitle {
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    line-height: 1.6;
+}
+
+/* Responsive adjustments for Story Mode */
+@media (max-width: 768px) {
+    .story-title {
+        font-size: 3rem;
+    }
+
+    .story-stat {
+        font-size: 4rem;
+    }
+
+    .story-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .story-eyebrow {
+        font-size: 0.9rem;
+        letter-spacing: 2px;
+    }
+}
+
+/* Animations */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Reset Scroll for Dropzone */
+.dropzone-screen {
+    height: 100vh;
+    scroll-snap-align: start;
+}
+
+/* Hide original section containers if they interfere */
+.mode-content-section {
+    display: none;
 }
